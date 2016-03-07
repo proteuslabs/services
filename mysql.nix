@@ -27,7 +27,7 @@
 
      password = mkOption {
        description = "Database password";
-       type = types.str;
+       type = types.nullOr types.str;
        default = null;
      };
    };

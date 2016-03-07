@@ -1,4 +1,4 @@
- { config, lib, ... }:
+ { config, lib, pkgs, ... }:
 
  with lib;
 
@@ -30,9 +30,15 @@
        type = types.nullOr types.str;
        default = null;
      };
+
+     sql = mkOption {
+       description = "Initial sql file";
+       type = types.nullOr types.lines;
+       default = null;
+     };
    };
 
-   config = mkIf cfg.enable {
+   config = mkIf cfg.enable (mkMerge [{
      kubernetes.controllers.mysql = {
        pod.containers.mysql = {
          image = "mysql:5.6";
@@ -60,5 +66,21 @@
        name = "mysql";
        size = "1G";
      };
-   };
+   } (mkIf (cfg.sql != null) {
+     kubernetes.controllers.mysql = {
+       pod.containers.mysql.mounts = [{
+         name = "mysql-init";
+         mountPath = "/docker-entrypoint-initdb.d";
+       }];
+
+       pod.volumes.mysql-init = {
+         type = "secret";
+         options.secretName = "mysql-init";
+       };
+     };
+
+     kubernetes.secrets.mysql-init = {
+       secrets."init.sql" = pkgs.writeText "init.sql" cfg.sql;
+     };
+   })]);
  }

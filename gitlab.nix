@@ -95,6 +95,8 @@
 
    config = mkIf cfg.enable {
      kubernetes.controllers.gitlab = {
+       dependencies = ["services/mysql" "pvc/gitlab-db" "pvc/gitlab-redis" "pvc/gitlab-data"];
+
        pod.containers.gitlab = {
          image = "sameersbn/gitlab:${cfg.version}";
          env = {

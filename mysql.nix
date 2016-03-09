@@ -40,6 +40,8 @@
 
    config = mkIf cfg.enable (mkMerge [{
      kubernetes.controllers.mysql = {
+       dependencies = ["services/mysql" "pvc/mysql"];
+
        pod.containers.mysql = {
          image = "mysql:5.6";
          env = {
@@ -68,6 +70,8 @@
      };
    } (mkIf (cfg.sql != null) {
      kubernetes.controllers.mysql = {
+       dependencies = ["secrets/mysql-init"];
+
        pod.containers.mysql.mounts = [{
          name = "mysql-init";
          mountPath = "/docker-entrypoint-initdb.d";

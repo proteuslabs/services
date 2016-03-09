@@ -24,6 +24,8 @@
    config = mkIf cfg.enable (mkMerge [
    {
      kubernetes.controllers.redis = {
+       dependencies = ["services/redis"];
+
        pod.containers.redis = {
          image = "redis";
          args = "redis-server --apendonly yes ${optionalString (cfg.password != null) "--requirepass ${cfg.password}"}";
@@ -36,9 +38,13 @@
 
      kubernetes.services.redis.ports = [{ port = 6379; }];
    } (mkIf cfg.persistent {
-     kubernetes.controllers.redis.pod.volumes.storage = {
-       type = "persistentVolumeClaim";
-       options.claimName = "redis";
+     kubernetes.controllers.redis = {
+       dependencies = ["pvc/redis"];
+
+       pod.volumes.storage = {
+         type = "persistentVolumeClaim";
+         options.claimName = "redis";
+       };
      };
 
      kubernetes.pvc.redis.size = "1G";

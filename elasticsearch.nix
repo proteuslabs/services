@@ -39,9 +39,7 @@
        };
      };
 
-     kubernetes.services.elasticsearch.ports = [{
-       port = 9200;
-     }];
+     kubernetes.services.elasticsearch.ports = [{ port = 9200; }];
 
      kubernetes.pvc.elasticsearch.size = "1G";
    };

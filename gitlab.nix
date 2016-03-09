@@ -95,7 +95,7 @@
 
    config = mkIf cfg.enable {
      kubernetes.controllers.gitlab = {
-       dependencies = ["services/mysql" "pvc/gitlab-db" "pvc/gitlab-redis" "pvc/gitlab-data"];
+       dependencies = ["services/gitlab" "pvc/gitlab-db" "pvc/gitlab-redis" "pvc/gitlab-data"];
 
        pod.containers.gitlab = {
          image = "sameersbn/gitlab:${cfg.version}";
@@ -167,7 +167,13 @@
        };
      };
 
-     kubernetes.services.mysql.ports = [{ port = 3306; }];
+     kubernetes.services.gitlab.ports = [{
+       port = 80;
+       name = "http";
+     } {
+       port = 22;
+       name = "ssh";
+     }];
 
      kubernetes.pvc.gitlab-db.size = "3G";
      kubernetes.pvc.gitlab-redis.size = "1G";

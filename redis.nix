@@ -33,6 +33,7 @@
            name = "storage";
            mountPath = "/data";
          }];
+         ports = [{ port = 6379; }];
        };
      };
 

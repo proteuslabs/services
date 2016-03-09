@@ -54,6 +54,7 @@
            name = "storage";
            mountPath = "/var/lib/mysql";
          }];
+         ports = [{ port = 3306; }];
        };
 
        pod.volumes.storage = {

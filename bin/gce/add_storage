@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+gcloud compute disks create --size ${1}GB $2 || true
+
+read -r -d '' resource << EOM
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: $2
+spec:
+  capacity:
+    storage: ${1}Gi
+  accessModes:
+    - ReadWriteOnce
+  gcePersistentDisk:
+    pdName: $2
+    fsType: ext4
+EOM
+
+echo "$resource"
+echo "$resource" | kubectl create -f -

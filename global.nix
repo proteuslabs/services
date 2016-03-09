@@ -9,6 +9,12 @@ with lib;
       type = types.str;
     };
 
+    internalDomain = mkOption {
+      description = "Namespace internal domain";
+      type = types.str;
+      default = "${config.kubernetes.namespace.name}.cluster.local";
+    };
+
     email = mkOption {
       description = "Sending email";
       type = types.str;

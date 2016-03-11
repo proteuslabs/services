@@ -28,7 +28,7 @@
 
        pod.containers.redis = {
          image = "redis";
-         args = "redis-server --apendonly yes ${optionalString (cfg.password != null) "--requirepass ${cfg.password}"}";
+         args = "redis-server --appendonly yes ${optionalString (cfg.password != null) "--requirepass ${cfg.password}"}";
          mounts = mkIf cfg.persistent [{
            name = "storage";
            mountPath = "/data";

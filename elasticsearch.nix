@@ -16,10 +16,11 @@
 
    config = mkIf cfg.enable {
      kubernetes.controllers.elasticsearch = {
+       dependencies = ["services/elasticsearch" "pvc/elasticsearch"];
        pod.containers.elasticsearch = {
          image = "quay.io/pires/docker-elasticsearch-kubernetes:1.7.2";
          env = {
-           NAMESPACE = config.kubernetes.namespace;
+           NAMESPACE = config.kubernetes.namespace.name;
            CLUSTER_NAME = cfg.clusterName;
            NODE_MASTER = "true";
            NODE_DATA = "true";
@@ -27,7 +28,7 @@
          };
          ports = [{ port = 9200; } { port = 9300; }];
          mounts = [{
-           name = "data";
+           name = "storage";
            mountPath = "/data";
          }];
          security.capabilities.add = ["IPC_LOCK"];

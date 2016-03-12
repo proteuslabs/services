@@ -4,5 +4,6 @@
   ./elasticsearch.nix
   ./gitlab.nix
   ./gitlab-runner.nix
+  ./pritunl.nix
   ./global.nix
 ]

@@ -5,5 +5,6 @@
   ./gitlab.nix
   ./gitlab-runner.nix
   ./pritunl.nix
+  ./nginx-ingress.nix
   ./global.nix
 ]

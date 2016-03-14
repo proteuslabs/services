@@ -6,5 +6,6 @@
   ./gitlab-runner.nix
   ./pritunl.nix
   ./nginx-ingress.nix
+  ./mediawiki.nix
   ./global.nix
 ]

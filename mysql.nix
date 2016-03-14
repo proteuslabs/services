@@ -39,36 +39,36 @@ in {
   };
 
   config = mkIf cfg.enable (mkMerge [{
-      kubernetes.controllers.mysql = {
+    kubernetes.controllers.mysql = {
       dependencies = ["services/mysql" "pvc/mysql"];
 
       pod.containers.mysql = {
-      image = "mysql:5.6";
-      env = {
-      MYSQL_ROOT_PASSWORD = cfg.rootPassword;
-      MYSQL_DATABASE = mkIf (cfg.database != null) cfg.database;
-      MYSQL_USER = mkIf (cfg.user != null) cfg.user;
-      MYSQL_PASSWORD = mkIf (cfg.password != null) cfg.password;
-      };
-      mounts = [{
-      name = "storage";
-      mountPath = "/var/lib/mysql";
-      }];
-      ports = [{ port = 3306; }];
+        image = "mysql:5.6";
+        env = {
+          MYSQL_ROOT_PASSWORD = cfg.rootPassword;
+          MYSQL_DATABASE = mkIf (cfg.database != null) cfg.database;
+          MYSQL_USER = mkIf (cfg.user != null) cfg.user;
+          MYSQL_PASSWORD = mkIf (cfg.password != null) cfg.password;
+        };
+        mounts = [{
+          name = "storage";
+          mountPath = "/var/lib/mysql";
+        }];
+        ports = [{ port = 3306; }];
       };
 
       pod.volumes.storage = {
-      type = "persistentVolumeClaim";
-      options.claimName = "mysql";
+        type = "persistentVolumeClaim";
+        options.claimName = "mysql";
       };
-      };
+    };
 
-      kubernetes.services.mysql.ports = [{ port = 3306; }];
+    kubernetes.services.mysql.ports = [{ port = 3306; }];
 
-      kubernetes.pvc.mysql = {
-        name = "mysql";
-        size = "1G";
-      };
+    kubernetes.pvc.mysql = {
+      name = "mysql";
+      size = "1G";
+    };
   } (mkIf (cfg.sql != null) {
     kubernetes.controllers.mysql = {
       dependencies = ["secrets/mysql-init"];

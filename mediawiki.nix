@@ -10,7 +10,7 @@ in {
 
     image = mkOption {
       description = "Mediawiki image to use";
-      default = "xtruder/mediawiki:1.26";
+      default = "xtruder/mediawiki:1.26-full";
       type = types.str;
     };
 
@@ -85,10 +85,11 @@ in {
       dependencies = ["services/mediawiki" "pvc/mediawiki" "secrets/mediawiki"];
 
       pod.containers.parsoid = {
-        image = "benhutchins/parsoid";
+        image = "motiz88/parsoid";
 
         env = {
-          MW_URL = cfg.url;
+          MW_URL = http://127.0.0.1;
+          PORT = "8000";
         };
 
         ports = [{ port = 8000; }];
@@ -119,6 +120,8 @@ in {
           MEDIAWIKI_UPDATE = true;
         };
 
+        postStart.command = "cp /config/settings.php /data/CustomSettings.php && echo ok";
+
         ports = [{ port = 80; } { port = 443; }];
       };
 
@@ -133,12 +136,26 @@ in {
       };
     };
 
-    kubernetes.services.mediawiki.ports = [{ port = 80; } { port = 443; }];
+    kubernetes.services.mediawiki.ports = [{
+      name = "http";
+      port = 80;
+    } {
+      name = "https";
+      port = 443;
+    } {
+      name = "parsoid";
+      port = 8000;
+    }];
     kubernetes.pvc.mediawiki.size = "10G";
 
     kubernetes.secrets.mediawiki.secrets = {
-      "CustomSettings.php" = (pkgs.writeText
-        "CustomSettings.php" (''<?php'' + cfg.customConfig + ''?>''));
+      "settings.php" = (pkgs.writeText
+        "CustomSettings.php" (
+          ''<?php
+          ${cfg.customConfig}
+          ?>''
+        )
+      );
     };
   };
 }

@@ -96,7 +96,7 @@ in {
       };
 
       pod.containers.mediawiki = {
-        image = "xtruder/mediawiki:1.26-full";
+        image = "offlinehacker/mediawiki:latest";
 
         mounts = [{
           name = "data";

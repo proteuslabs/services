@@ -7,5 +7,7 @@
   ./pritunl.nix
   ./nginx-ingress.nix
   ./mediawiki.nix
+  ./influxdb.nix
+  ./grafana.nix
   ./global.nix
 ]

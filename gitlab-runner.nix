@@ -32,7 +32,7 @@ in {
       };
 
       containers.dind = {
-        image = "docker:1.9.1-dind";
+        image = "docker:1.10-dind";
         security.privileged = true;
         args = ["--storage-driver" cfg.storageDriver];
         mounts = [{

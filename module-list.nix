@@ -10,4 +10,5 @@
   ./influxdb.nix
   ./grafana.nix
   ./global.nix
+  ./rabbitmq.nix
 ]

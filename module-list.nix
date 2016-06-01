@@ -13,4 +13,5 @@
   ./nfs.nix
   ./crossbar.nix
   ./global.nix
+  ./rabbitmq.nix
 ]

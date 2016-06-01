@@ -19,6 +19,12 @@ in {
       default = null;
     };
 
+    args = mkOption {
+      description = "List of mysqld arguments";
+      type = types.listOf types.str;
+      default = [];
+    };
+
     user = mkOption {
       description = "Databse user";
       type = types.nullOr types.str;
@@ -55,6 +61,8 @@ in {
           mountPath = "/var/lib/mysql";
         }];
         ports = [{ port = 3306; }];
+        requests.memory = "128Mi";
+        requests.cpu = "250m";
       };
 
       pod.volumes.storage = {
@@ -73,10 +81,13 @@ in {
     kubernetes.controllers.mysql = {
       dependencies = ["secrets/mysql-init"];
 
-      pod.containers.mysql.mounts = [{
-        name = "mysql-init";
-        mountPath = "/docker-entrypoint-initdb.d";
-      }];
+      pod.containers.mysql = {
+        mounts = [{
+          name = "mysql-init";
+          mountPath = "/docker-entrypoint-initdb.d";
+        }];
+        args = ["mysqld"] ++ cfg.args;
+      };
 
       pod.volumes.mysql-init = {
         type = "secret";

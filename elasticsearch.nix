@@ -25,12 +25,18 @@
            NODE_MASTER = "true";
            NODE_DATA = "true";
            HTTP_ENABLE = "true";
+           ES_HEAP_SIZE = "512m";
          };
          ports = [{ port = 9200; } { port = 9300; }];
          mounts = [{
            name = "storage";
            mountPath = "/data";
          }];
+
+         requests.memory = "512Mi";
+         requests.cpu = "250m";
+         limits.memory = "768Mi";
+
          security.capabilities.add = ["IPC_LOCK"];
        };
 

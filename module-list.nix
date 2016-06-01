@@ -9,5 +9,8 @@
   ./mediawiki.nix
   ./influxdb.nix
   ./grafana.nix
+  ./kibana.nix
+  ./nfs.nix
+  ./crossbar.nix
   ./global.nix
 ]

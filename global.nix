@@ -9,10 +9,15 @@ with lib;
       type = types.str;
     };
 
+    registry = mkOption {
+      description = "Url of docker private registry";
+      type = types.str;
+    };
+
     internalDomain = mkOption {
       description = "Namespace internal domain";
       type = types.str;
-      default = "${config.kubernetes.namespace.name}.cluster.local";
+      default = "${config.kubernetes.namespace.name}.svc.cluster.local";
     };
 
     email = mkOption {

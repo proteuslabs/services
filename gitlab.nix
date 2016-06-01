@@ -11,7 +11,7 @@
      version = mkOption {
        description = "Gitlab version to use";
        type = types.str;
-       default = "8.5.1";
+       default = "8.7.0";
      };
 
      host = mkOption {
@@ -120,9 +120,14 @@
            SMTP_PORT = toString cfg.smtp.port;
            SMTP_USER = cfg.smtp.user;
            SMTP_PASS = cfg.smtp.pass;
-           SMTP_STARTTLS = if cfg.smtp.tls then "yes" else "no";
+           SMTP_STARTTLS = if cfg.smtp.tls then "true" else "false";
            SMTP_AUTHENTICATION = "login";
          };
+
+         requests.memory = "1536Mi";
+         requests.cpu = "500m";
+         limits.memory = "1700Mi";
+         limits.cpu = "500m";
 
          mounts = [{
            name = "data";
@@ -131,11 +136,18 @@
        };
 
        pod.containers.postgres = {
-         image = "sameersbn/postgresql:9.4-3";
+         image = "sameersbn/postgresql:9.4-20";
+
+         requests.memory = "128Mi";
+         requests.cpu = "50m";
+         limits.memory = "256Mi";
+         limits.cpu = "100m";
+
          env = {
            DB_USER = "gitlab";
            DB_PASS = "gitlab";
            DB_NAME = "gitlab";
+           DB_EXTENSION = "pg_trgm";
          };
          mounts = [{
            name = "db";
@@ -145,6 +157,12 @@
 
        pod.containers.redis = {
          image = "sameersbn/redis:latest";
+
+         requests.memory = "64Mi";
+         requests.cpu = "50m";
+         limits.memory = "64Mi";
+         limits.cpu = "100m";
+
          mounts = [{
            name = "redis";
            mountPath = "/var/lib/redis";

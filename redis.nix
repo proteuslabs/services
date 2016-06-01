@@ -34,6 +34,8 @@ in {
           mountPath = "/data";
         }];
         ports = [{ port = 6379; }];
+        requests.memory = "128Mi";
+        requests.cpu = "50m";
       };
     };
 

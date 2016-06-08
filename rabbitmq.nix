@@ -42,7 +42,7 @@ in {
           name = "storage";
           mountPath = "/var/lib/rabbitmq";
         }];
-        ports = [{ port = 15672; port = 4369; }];
+        ports = [{ port = 15672; }];
       };
 
       pod.volumes.storage = {

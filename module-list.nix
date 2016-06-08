@@ -14,4 +14,5 @@
   ./crossbar.nix
   ./global.nix
   ./rabbitmq.nix
+  ./sinopia.nix
 ]

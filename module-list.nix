@@ -15,4 +15,5 @@
   ./global.nix
   ./rabbitmq.nix
   ./sinopia.nix
+  ./logstash.nix
 ]

@@ -16,12 +16,18 @@ in {
       description = "Logstash configuration file content";
       type = types.lines;
     };
+
+    image = mkOption {
+      description = "Name of the image";
+      type = types.str;
+      default = "logstash";
+    };
   };
 
   config = mkIf cfg.enable {
     kubernetes.controllers.logstash = {
       pod.containers.logstash = {
-        image = "logstash";
+        image = cfg.image;
         command = ["logstash" "-e" cfg.configuration];
 
         requests.memory = "512Mi";

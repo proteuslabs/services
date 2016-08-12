@@ -16,4 +16,5 @@
   ./rabbitmq.nix
   ./sinopia.nix
   ./logstash.nix
+  ./kapacitor.nix
 ]

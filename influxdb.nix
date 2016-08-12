@@ -31,7 +31,7 @@ in {
     kubernetes.controllers.influxdb = {
       dependencies = ["services/influxdb" "pvc/influxdb"];
       pod.containers.influxdb = {
-        image = "tutum/influxdb:0.10";
+        image = "tutum/influxdb:0.13";
         env = {
           ADMIN_USER = cfg.adminUser;
           INFLUXDB_INIT_PWD = cfg.adminPassword;

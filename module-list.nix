@@ -17,4 +17,5 @@
   ./sinopia.nix
   ./logstash.nix
   ./kapacitor.nix
+  ./ethereum.nix
 ]

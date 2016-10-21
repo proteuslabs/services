@@ -8,6 +8,12 @@ in {
   options.services.kapacitor = {
     enable = mkEnableOption "kapacitor service";
 
+    hostname = mkOption {
+      description = "Hostname of this service";
+      type = types.str;
+      default = "kapacitor";
+    };
+
     influxdb = {
       url = mkOption {
         description = "Influxdb url";
@@ -55,6 +61,11 @@ in {
         description = "Send from address";
         type = types.str;
       };
+
+      to = mkOption {
+        description = "Email to send to";
+        type = types.str;
+      };
     };
 
     hipchat = {
@@ -78,11 +89,17 @@ in {
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers.kapacitor = {
+    kubernetes.deployments.kapacitor = {
       dependencies = ["services/kapacitor" "pvc/kapacitor"];
       pod.containers.kapacitor = {
-        image = "kapacitor";
+        image = "kapacitor:1.0.0-rc2";
+        security.privileged = true;
         env = mkMerge [{
+          KAPACITOR_HOSTNAME = cfg.hostname;
+          KAPACITOR_DATA_DIR = "/var/lib/kapacitor";
+          KAPACITOR_STORAGE_BOLTDB = "/var/lib/kapacitor/kapacitor.db";
+          KAPACITOR_REPLAY_DIR = "/var/lib/kapacitor/replay";
+          KAPACITOR_TASKS_DIR = "/var/lib/kapacitor/tasks";
           KAPACITOR_INFLUXDB_0_URLS_0 = cfg.influxdb.url;
           KAPACITOR_INFLUXDB_0_USERNAME = cfg.influxdb.user;
           KAPACITOR_INFLUXDB_0_PASSWORD = cfg.influxdb.pass;
@@ -93,6 +110,7 @@ in {
           KAPACITOR_SMTP_USERNAME = cfg.smtp.user;
           KAPACITOR_SMTP_PASSWORD = cfg.smtp.pass;
           KAPACITOR_SMTP_FROM = cfg.smtp.from;
+          KAPACITOR_SMTP_TO_0 = cfg.smtp.to;
         })];
         ports = [{ port = 9092; }];
         mounts = [{

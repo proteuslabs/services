@@ -28,14 +28,11 @@ in {
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers.influxdb = {
+    kubernetes.deployments.influxdb = {
       dependencies = ["services/influxdb" "pvc/influxdb"];
       pod.containers.influxdb = {
-        image = "tutum/influxdb:0.13";
+        image = "influxdb:1.0.0-rc2";
         env = {
-          ADMIN_USER = cfg.adminUser;
-          INFLUXDB_INIT_PWD = cfg.adminPassword;
-          PRE_CREATE_DB = concatStringsSep ";" cfg.preCreateDb;
         };
         ports = [
           { port = 8083; } # admin
@@ -45,7 +42,7 @@ in {
         ];
         mounts = [{
           name = "storage";
-          mountPath = "/data";
+          mountPath = "/var/lib/influxdb";
         }];
       };
 

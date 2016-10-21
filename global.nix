@@ -2,7 +2,9 @@
 
 with lib;
 
-{
+let
+  cfg = config.globals;
+in {
   options.globals = {
     domain = mkOption {
       description = "Company domain name";
@@ -57,6 +59,12 @@ with lib;
       user = mkOption {
         description = "SMTP user";
         type = types.str;
+      };
+
+      from = mkOption {
+        description = "Send emails from";
+        type = types.str;
+        default = cfg.smtp.user;
       };
 
       pass = mkOption {

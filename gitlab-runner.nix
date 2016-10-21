@@ -105,7 +105,7 @@ in {
         };
 
         pod.containers.dind = {
-          image = "docker:1.10-dind";
+          image = "docker:1.12-dind";
           security.privileged = true;
           args = ["--storage-driver" cfg.storageDriver];
           requests.memory = "1024Mi";

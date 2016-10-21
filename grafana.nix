@@ -10,7 +10,7 @@ in {
 
     version = mkOption {
       description = "Version of grafana to use";
-      default = "2.6.0";
+      default = "latest";
       type = types.str;
     };
 
@@ -33,7 +33,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers.grafana = {
+    kubernetes.deployments.grafana = {
       dependencies = ["services/grafana" "pvc/grafana"];
       pod.containers.grafana = {
         image = "grafana/grafana:${cfg.version}";

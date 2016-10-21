@@ -19,7 +19,7 @@ in {
     internalDomain = mkOption {
       description = "Namespace internal domain";
       type = types.str;
-      default = "${config.kubernetes.namespace.name}.svc.cluster.local";
+      default = "svc.cluster.local";
     };
 
     email = mkOption {

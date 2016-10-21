@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 
@@ -26,13 +26,30 @@ in {
 
   config = mkIf cfg.enable {
     kubernetes.controllers.logstash = {
+      dependencies = ["secrets/logstash"];
+
       pod.containers.logstash = {
         image = cfg.image;
-        command = ["logstash" "-e" cfg.configuration];
+
+        command = ["logstash" "-f" "/etc/logstash/logstash.conf" "--auto-reload"];
 
         requests.memory = "512Mi";
         limits.memory = "512Mi";
+
+        mounts = [{
+          name = "config";
+          mountPath = "/etc/logstash";
+        }];
       };
+
+      pod.volumes.config = {
+        type = "secret";
+        options.secretName = "logstash";
+      };
+    };
+
+    kubernetes.secrets.logstash = {
+      secrets."logstash.conf" = pkgs.writeText "logstash.conf" cfg.configuration;
     };
   };
 }

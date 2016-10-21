@@ -20,7 +20,7 @@
        pod.containers.elasticsearch = {
          image = "quay.io/pires/docker-elasticsearch-kubernetes:1.7.2";
          env = {
-           NAMESPACE = config.kubernetes.namespace.name;
+           NAMESPACE = config.kubernetes.defaultNamespace;
            CLUSTER_NAME = cfg.clusterName;
            NODE_MASTER = "true";
            NODE_DATA = "true";

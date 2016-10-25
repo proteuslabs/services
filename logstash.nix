@@ -40,7 +40,7 @@ in {
         command = ["logstash" "-f" "/etc/logstash/logstash.conf" "--auto-reload"];
 
         requests.memory = "512Mi";
-        limits.memory = "512Mi";
+        limits.memory = "1024Mi";
 
         mounts = [{
           name = "config";

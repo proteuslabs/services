@@ -22,10 +22,16 @@ in {
       type = types.str;
       default = "logstash";
     };
+
+    kind = mkOption {
+      description = "Kind of ";
+      default = "deployment";
+      type = types.enum ["deployment" "daemonset"];
+    };
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers.logstash = {
+    kubernetes."${cfg.kind}s".logstash = {
       dependencies = ["secrets/logstash"];
 
       pod.containers.logstash = {

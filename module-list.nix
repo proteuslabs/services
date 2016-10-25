@@ -17,6 +17,7 @@
   ./rabbitmq.nix
   ./sinopia.nix
   ./logstash.nix
+  ./kubelog.nix
   ./kapacitor.nix
   ./tick.nix
 ]

@@ -5,6 +5,7 @@
   ./gitlab.nix
   ./gitlab-runner.nix
   ./pritunl.nix
+  ./openvpn.nix
   ./nginx-ingress.nix
   ./mediawiki.nix
   ./influxdb.nix

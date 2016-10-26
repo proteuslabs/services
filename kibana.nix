@@ -10,27 +10,29 @@ in {
 
     version = mkOption {
       description = "Version of kibana to use";
-      default = "4.1.1";
+      default = "4.6";
       type = types.str;
     };
 
     elasticsearchUrl = mkOption {
       description = "Elasticsearch url";
-      default = "http://10.231.248.73:9200";
+      default = "http://elasticsearch:9200";
       type = types.str;
     };
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers.kibana = {
+    kubernetes.deployments.kibana = {
       dependencies = ["services/kibana"];
       pod.containers.kibana = {
-        image = "quay.io/pires/docker-kibana:${cfg.version}";
+        image = "kibana:${cfg.version}";
         env = {
-          KIBANA_ES_URL = cfg.elasticsearchUrl;
-          KIBANA_TRUST_CERT = "true";
+          ELASTICSEARCH_URL = cfg.elasticsearchUrl;
         };
         ports = [{ port = 5601; }];
+
+        requests.memory = "64Mi";
+        limits.memory = "128Mi";
       };
     };
 

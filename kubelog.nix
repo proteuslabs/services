@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.services.kubelog;
+cfg = config.services.kubelog;
 in {
   options.services.kubelog = {
     enable = mkOption {
@@ -41,41 +41,47 @@ in {
         input {
           file {
             path => "/var/log/containers/*.log"
-            sincedb_path => "/data/sincedb"
+              sincedb_path => "/data/sincedb"
           }
         }
 
-        filter {
-          kubernetes {}
+      filter {
+        kubernetes {}
 
-          if [kubernetes][namespace] not in [${concatMapStringsSep ","
+        if [kubernetes][namespace] not in [${concatMapStringsSep ","
           (n: ''"${n}"'')cfg.namespaces}] {
             drop { }
           }
 
-          ${optionalString (cfg.containers != null) ''
+        ${optionalString (cfg.containers != null) ''
           if [kubernetes][container_name] not in [${concatStringsSep ","
             cfg.containers}] {
-            drop {}
-          }
+              drop {}
+            }
           ''}
 
-          json {
-            source => "message"
-          }
+        json {
+          source => "message"
+        }
 
+        mutate {
+          remove_field => "message"
+        }
+
+        json {
+          source => "log"
+        }
+
+        if [kubernetes][replication_controller] {
           mutate {
-            remove_field => "message"
-          }
-
-          json {
-            source => "log"
-          }
+            add_field => { "_kube_name" => "%{[kubernetes][replication_controller]}" }
+          }            
         }
+      }
 
-        output {
-          ${cfg.outputConfig}
-        }
+      output {
+        ${cfg.outputConfig}
+      }
       '';
     };
 

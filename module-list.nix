@@ -2,6 +2,7 @@
   ./mysql.nix
   ./redis.nix
   ./elasticsearch.nix
+  ./curator.nix
   ./gitlab.nix
   ./gitlab-runner.nix
   ./pritunl.nix

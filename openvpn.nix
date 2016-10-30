@@ -68,6 +68,11 @@ in {
       description = "Kubernetes dns server";
       type = types.str;
     };
+
+    extraOpts = mkOption {
+      description = "Additional vpn options";
+      type = types.str;
+    };
   };
 
   config = mkIf cfg.enable {
@@ -85,6 +90,7 @@ in {
           OVPN_K8S_SERVICE_SUBNET = cfg.serviceSubnet;
           OVPN_K8S_DOMAIN = cfg.domain;
           OVPN_K8S_DNS = cfg.dns;
+          MORE_OPTS = cfg.extraOpts;
         };
         ports = [
           { name = "tcp"; port = 1194; protocol = "TCP"; }

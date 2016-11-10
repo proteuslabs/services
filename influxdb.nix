@@ -31,7 +31,7 @@ in {
     kubernetes.deployments.influxdb = {
       dependencies = ["services/influxdb" "pvc/influxdb"];
       pod.containers.influxdb = {
-        image = "influxdb:1.0.0-rc2";
+        image = "influxdb:1.0.0";
         env = {
         };
         ports = [
@@ -44,6 +44,10 @@ in {
           name = "storage";
           mountPath = "/var/lib/influxdb";
         }];
+        requests.memory = "256Mi";
+        requests.cpu = "200m";
+        limits.memory = "256Mi";
+        limits.cpu = "200m";
       };
 
       pod.volumes.storage = {

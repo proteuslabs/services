@@ -48,6 +48,10 @@ in {
       filter {
         kubernetes {}
 
+        date {
+          match => [ "time", "ISO8601" ]
+        }
+
         if [kubernetes][namespace] not in [${concatMapStringsSep ","
           (n: ''"${n}"'')cfg.namespaces}] {
             drop { }

@@ -21,4 +21,5 @@
   ./kubelog.nix
   ./kapacitor.nix
   ./tick.nix
+  ./heapster.nix
 ]

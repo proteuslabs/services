@@ -117,6 +117,10 @@ in {
           name = "storage";
           mountPath = "/var/lib/kapacitor";
         }];
+        requests.memory = "50Mi";
+        requests.cpu = "100m";
+        limits.memory = "50Mi";
+        limits.cpu = "100m";
       };
 
       pod.volumes.storage = {

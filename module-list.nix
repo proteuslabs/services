@@ -22,4 +22,6 @@
   ./kapacitor.nix
   ./tick.nix
   ./heapster.nix
+  ./apidocs.nix
+  ./vault.nix
 ]

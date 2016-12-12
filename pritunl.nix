@@ -19,6 +19,11 @@ in {
       type = types.attrs;
       default = {};
     };
+
+    mongodbUri = mkOption {
+      description = "URI for mongodb database";
+      type = types.str;
+    };
   };
 
   config = mkIf cfg.enable {
@@ -28,33 +33,17 @@ in {
       pod.containers.pritunl = {
         image = cfg.image;
         env = {
-          MONGO_URI = "mongodb://127.0.0.1:27017/pritunl";
+          MONGO_URI = cfg.mongodbUri;
           PRITUNL_FIREWALL_CONFIG_PATH = "/etc/pritunl/rules.json";
         };
         security.privileged = true;
         ports = [{ port = 1194; } { port = 80; } { port = 443; }];
-        requests.memory = "128Mi";
-        requests.cpu = "50m";
+        #requests.memory = "128Mi";
+        #requests.cpu = "50m";
         mounts = [{
           name = "firewall";
           mountPath = "/etc/pritunl";
         }];
-      };
-
-      pod.containers.mongodb = {
-        image = "mongo";
-        mounts = [{
-          name = "storage";
-          mountPath = "/data/db";
-        }];
-        ports = [{ port = 27017; }];
-        requests.memory = "128Mi";
-        requests.cpu = "50m";
-      };
-
-      pod.volumes.storage = {
-        type = "persistentVolumeClaim";
-        options.claimName = "pritunl";
       };
 
       pod.volumes.firewall = {
@@ -67,6 +56,9 @@ in {
       ports = [{
         name = "pritunl";
         port = 443;
+      } {
+        name = "pritunl-http";
+        port = 80;
       } {
         name = "openvpn";
         port = 1194;

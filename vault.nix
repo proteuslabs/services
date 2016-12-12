@@ -35,17 +35,7 @@ in {
         requests.cpu = "50m";
         limits.memory = "128Mi";
         limits.cpu = "500m";
-
-        mounts = [{
-          name = "vaultcfg";
-          mountPath = "/vault/config/";
-        }];
       };
-        pod.volumes.vaultcfg = {
-          type = "secret";
-          options.secretName = "vault";
-        };
-
 
       pod.containers.vault-ui = {
         image = "nyxcharon/vault-ui";

@@ -27,7 +27,7 @@
          }];
 
          env = {
-            ES_HEAP_SIZE = "2g";
+            ES_HEAP_SIZE = "6g";
          };
 
          requests.memory = "4096Mi";

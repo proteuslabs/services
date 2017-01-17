@@ -10,7 +10,7 @@ in {
 
     version = mkOption {
       description = "Version of grafana to use";
-      default = "latest";
+      default = "4.1.0-beta1";
       type = types.str;
     };
 
@@ -23,6 +23,44 @@ in {
       description = "Grafana admin password";
       type = types.str;
       default = "admin";
+    };
+
+    db = {
+      type = mkOption {
+        description = "Database type";
+        default = "sqlite";
+        type = types.enum ["sqlite" "mysql" "postgres"];
+      };
+
+      path = mkOption {
+        description = "Database path";
+        type = types.nullOr types.str;
+        default = null; 
+      };
+
+      host = mkOption {
+        description = "Database host";
+        type = types.nullOr types.str;
+        default = null;
+      };
+
+      name = mkOption {
+        description = "Database name";
+        type = types.nullOr types.str;
+        default = null;
+      };
+
+      user = mkOption {
+        description = "Database user";
+        type = types.nullOr types.str;
+        default = null;
+      };
+
+      password = mkOption {
+        description = "Database password";
+        type = types.nullOr types.str;
+        default = null;
+      };
     };
 
     extraConfig = mkOption {
@@ -42,7 +80,13 @@ in {
           GF_SECURITY_ADMIN_PASSWORD = cfg.adminPassword;
           GF_PATHS_DATA = "/data";
           GF_USERS_ALLOW_SIGN_UP = "false";
-        } // (mapAttrs' (name: val: nameValuePair "GF_" + name val) cfg.extraConfig);
+          GF_DATABASE_TYPE = cfg.db.type;
+          GF_DATABASE_PATH = cfg.db.path;
+          GF_DATABASE_HOST = cfg.db.host;
+          GF_DATABASE_NAME = cfg.db.name;
+          GF_DATABASE_USER = cfg.db.user;
+          GF_DATABASE_PASSWORD = cfg.db.password;
+        } // (mapAttrs' (name: val: nameValuePair ("GF_" + name) val) cfg.extraConfig);
         ports = [{ port = 3000; }];
         mounts = [{
           name = "storage";

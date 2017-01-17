@@ -23,6 +23,24 @@ in {
       type = types.int;
     };
 
+    ssl = mkOption {
+      description = "Whether currator should use ssl or not";
+      default = false;
+      type = types.bool;
+    };
+
+    username = mkOption {
+      description = "Simple auth username";
+      default = null;
+      type = types.nullOr types.str;
+    };
+
+     password = mkOption {
+      description = "Simple auth password";
+      default = null;
+      type = types.nullOr types.str;
+    };
+
     aws = {
       key = mkOption {
         description = "Aws key";
@@ -78,7 +96,7 @@ in {
 
       job.activeDeadlineSeconds = 30;
       job.pod.containers.curator =  {
-        image = "bobrik/curator:4.1.2";
+        image = "bobrik/curator:4.2.4";
         args = ["--config" "/etc/curator/config.yml" "/etc/curator/actions.yml"];
 
         requests.memory = "256Mi";
@@ -104,10 +122,13 @@ in {
       secrets."config.yml" = toYAML {
         client = {
           inherit (cfg) hosts port;
+          use_ssl = cfg.ssl;
           aws_key = cfg.aws.key;
           aws_secret_key = cfg.aws.secretKey;
           aws_region = cfg.aws.region;
-        };
+        } // (optionalAttrs (cfg.username != null && cfg.password != null) {
+          http_auth = "${cfg.username}:${cfg.password}";
+        });
         logging = {
           loglevel = "INFO";
           logformat = "json";

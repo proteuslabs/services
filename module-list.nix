@@ -20,7 +20,9 @@
   ./logstash.nix
   ./kubelog.nix
   ./kapacitor.nix
+  ./telegraf.nix
   ./tick.nix
   ./heapster.nix
   ./vault.nix
+  ./aws-es-kibana.nix
 ]

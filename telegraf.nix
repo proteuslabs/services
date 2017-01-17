@@ -14,18 +14,18 @@ in {
 
     configuration = mkOption {
       description = "Telegraf configuration file content";
-      type = types.lines;
+      type = types.attrs;
     };
 
     image = mkOption {
       description = "Name of the image";
       type = types.str;
-      default = "telegraf";
+      default = "telegraf:1.2.0-rc1";
     };
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers.telegraf = {
+    kubernetes.deployments.telegraf = {
       dependencies = ["secrets/telegraf"];
       pod.containers.telegraf = {
         image = cfg.image;
@@ -42,7 +42,13 @@ in {
     };
 
     kubernetes.secrets.telegraf = {
-      secrets."telegraf.conf" = pkgs.writeText "telegraf.conf" cfg.configuration;
-    };
+       secrets."telegraf.conf" = pkgs.runCommand "telegraf.toml" {
+          buildInputs = [pkgs.remarshal];
+        } ''
+          remarshal -if json -of toml -i ${
+            pkgs.writeText "config.json" (builtins.toJSON cfg.configuration)
+          } > $out
+        '';
+     };
   };
 }

@@ -25,4 +25,5 @@
   ./heapster.nix
   ./vault.nix
   ./aws-es-kibana.nix
+  ./kube-lego.nix
 ]

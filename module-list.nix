@@ -7,7 +7,7 @@
   ./gitlab-runner.nix
   ./pritunl.nix
   ./openvpn.nix
-  ./nginx-ingress.nix
+  ./nginxingress.nix
   ./mediawiki.nix
   ./influxdb.nix
   ./grafana.nix
@@ -25,4 +25,5 @@
   ./heapster.nix
   ./vault.nix
   ./aws-es-kibana.nix
+  ./kube-lego.nix
 ]

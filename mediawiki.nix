@@ -10,7 +10,7 @@ in {
 
     image = mkOption {
       description = "Mediawiki image to use";
-      default = "xtruder/mediawiki:1.26-full";
+      default = "xtruder/mediawiki:1.29";
       type = types.str;
     };
 
@@ -96,7 +96,7 @@ in {
       };
 
       pod.containers.mediawiki = {
-        image = "offlinehacker/mediawiki:latest";
+        image = cfg.image;
 
         mounts = [{
           name = "data";

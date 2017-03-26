@@ -109,7 +109,7 @@ in {
           security.privileged = true;
           args = ["--storage-driver" cfg.storageDriver];
           requests.memory = "1024Mi";
-          requests.cpu = "250m";
+          requests.cpu = "500m";
           limits.memory = "1024Mi";
           mounts = [{
             name = "cgroups";

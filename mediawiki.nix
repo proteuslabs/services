@@ -85,7 +85,7 @@ in {
       dependencies = ["services/mediawiki" "pvc/mediawiki" "secrets/mediawiki"];
 
       pod.containers.parsoid = {
-        image = "motiz88/parsoid";
+        image = "offlinehacker/parsoid";
 
         env = {
           MW_URL = http://127.0.0.1;

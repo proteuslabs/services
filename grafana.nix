@@ -92,6 +92,11 @@ in {
           name = "storage";
           mountPath = "/data";
         }];
+
+        readinessProbe.httpGet = {
+          path = "/login";
+          port = 3000;
+        };
       };
 
       pod.volumes.storage = {

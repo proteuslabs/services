@@ -123,6 +123,11 @@ in {
         postStart.command = "cp /config/settings.php /data/CustomSettings.php && echo ok";
 
         ports = [{ port = 80; } { port = 443; }];
+
+        readinessProbe.httpGet = {
+          path = "/index.php/Main_Page";
+          port = 80;
+        };
       };
 
       pod.volumes.data = {

@@ -81,7 +81,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers.mediawiki = {
+    kubernetes.deployments.mediawiki = {
       dependencies = ["services/mediawiki" "pvc/mediawiki" "secrets/mediawiki"];
 
       pod.containers.parsoid = {

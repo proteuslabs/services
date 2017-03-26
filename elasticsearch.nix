@@ -1,49 +1,72 @@
 { config, lib, ... }:
 
- with lib;
+with lib;
 
- let
-   cfg = config.services.elasticsearch;
- in {
-   options.services.elasticsearch = {
-     enable = mkEnableOption "elasticsearch service";
+let
+cfg = config.services.elasticsearch;
+in {
+  options.services.elasticsearch = {
+    enable = mkEnableOption "elasticsearch service";
 
-     clusterName = mkOption {
-       description = "Name of the cluster";
-       type = types.str;
-     };
-   };
+    image = mkOption {
+      description = "Elasticsearch image to use";
+      default = "docker.elastic.co/elasticsearch/elasticsearch:5.2.2";
+    };
 
-   config = mkIf cfg.enable {
-     kubernetes.deployments.elasticsearch = {
-       dependencies = ["services/elasticsearch" "pvc/elasticsearch"];
+    clusterName = mkOption {
+      description = "Name of the cluster";
+      type = types.str;
+    };
+  };
 
-       pod.containers.elasticsearch = {
-         image = "gatehub/elasticsearch";
-         ports = [{ port = 9200; }];
-         mounts = [{
-           name = "storage";
-           mountPath = "/usr/share/elasticsearch/data";
-         }];
+  config = mkIf cfg.enable {
+    kubernetes.deployments.elasticsearch = {
+      dependencies = ["services/elasticsearch" "pvc/elasticsearch"];
 
-         env = {
-            ES_HEAP_SIZE = "6g";
-         };
+      pod.annotations = {
+        "pod.beta.kubernetes.io/init-containers" = ''[
+        {
+          "name": "sysctl",
+          "image": "busybox",
+          "imagePullPolicy": "IfNotPresent",
+          "command": ["sysctl", "-w", "vm.max_map_count=262144"],
+          "securityContext": {
+            "privileged": true
+          }
+        }
+        ]'';
+      };
 
-         requests.memory = "4096Mi";
-         requests.cpu = "1000m";
+      pod.containers.elasticsearch = {
+        image = cfg.image;
+        command = ["/bin/bash" "-c" ''
+# kubernetes does not support dotted env variables
+          env xpack.security.enabled=false http.host=0.0.0.0 transport.host=127.0.0.1 bin/es-docker
+          ''];
+        ports = [{ port = 9200; }];
+        mounts = [{
+          name = "storage";
+          mountPath = "/usr/share/elasticsearch/data";
+        }];
 
-         security.capabilities.add = ["IPC_LOCK"];
-       };
+        env = {
+          ES_JAVA_OPTS="-Xms512m -Xmx512m";
+        };
 
-       pod.volumes.storage = {
-         type = "persistentVolumeClaim";
-         options.claimName = "elasticsearch";
-       };
-     };
+        requests.memory = "4096Mi";
+        requests.cpu = "1000m";
 
-     kubernetes.services.elasticsearch.ports = [{ port = 9200; }];
+        security.capabilities.add = ["IPC_LOCK"];
+      };
 
-     kubernetes.pvc.elasticsearch.size = mkDefault "1G";
-   };
- }
+      pod.volumes.storage = {
+        type = "persistentVolumeClaim";
+        options.claimName = "elasticsearch";
+      };
+    };
+
+    kubernetes.services.elasticsearch.ports = [{ port = 9200; }];
+
+    kubernetes.pvc.elasticsearch.size = mkDefault "1G";
+  };
+}

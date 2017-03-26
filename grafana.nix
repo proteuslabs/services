@@ -28,8 +28,8 @@ in {
     db = {
       type = mkOption {
         description = "Database type";
-        default = "sqlite";
-        type = types.enum ["sqlite" "mysql" "postgres"];
+        default = "sqlite3";
+        type = types.enum ["sqlite3" "mysql" "postgres"];
       };
 
       path = mkOption {

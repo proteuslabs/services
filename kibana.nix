@@ -17,7 +17,7 @@ in {
 
     version = mkOption {
       description = "Version of kibana to use";
-      default = "5";
+      default = "5.1.2";
       type = types.str;
     };
 

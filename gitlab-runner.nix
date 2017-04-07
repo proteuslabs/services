@@ -90,7 +90,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    kubernetes.controllers = listToAttrs (mapAttrsFlatten (name: token:
+    kubernetes.deployments = listToAttrs (mapAttrsFlatten (name: token:
       nameValuePair "gitlab-runner-${name}" {
         dependencies = ["secrets/gitlab-runner-${name}"];
 

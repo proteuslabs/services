@@ -23,9 +23,9 @@ in {
           "--source=kubernetes.summary_api:"
           "--sink=${cfg.sink}"
         ];
-        requests.memory = "50Mi";
+        requests.memory = "128Mi";
         requests.cpu = "100m";
-        limits.memory = "50Mi";
+        limits.memory = "128Mi";
         limits.cpu = "100m";
       };
       pod.containers.eventer = {
@@ -35,9 +35,9 @@ in {
           "--source=kubernetes:"
           "--sink=${cfg.sink}"
         ];
-        requests.memory = "50Mi";
+        requests.memory = "128Mi";
         requests.cpu = "100m";
-        limits.memory = "50Mi";
+        limits.memory = "128Mi";
         limits.cpu = "100m";
       };
     };

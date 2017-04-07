@@ -42,9 +42,9 @@ in {
           name = "storage";
           mountPath = "/var/lib/influxdb";
         }];
-        requests.memory = "256Mi";
+        requests.memory = "2048Mi";
         requests.cpu = "200m";
-        limits.memory = "256Mi";
+        limits.memory = "2048Mi";
         limits.cpu = "200m";
       };
 

@@ -70,9 +70,9 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (mkMerge [{
     kubernetes.deployments.grafana = {
-      dependencies = ["services/grafana" "pvc/grafana"];
+      dependencies = ["services/grafana"];
       pod.containers.grafana = {
         image = "grafana/grafana:${cfg.version}";
         env = {
@@ -98,14 +98,21 @@ in {
           port = 3000;
         };
       };
+    };
 
+    kubernetes.services.grafana.ports = [{ port = 80; targetPort = 3000; }];
+  } (mkIf (cfg.db.type != "sqlite3") {
+    kubernetes.deployments.grafana.pod.volumes.storage = {
+      type = "emptyDir";
+    };
+  }) (mkIf (cfg.db.type == "sqlite3") {
+    kubernetes.deployments.grafana = {
+      dependencies = ["pvc/grafana"];
       pod.volumes.storage = {
         type = "persistentVolumeClaim";
         options.claimName = "grafana";
       };
     };
-
-    kubernetes.services.grafana.ports = [{ port = 80; targetPort = 3000; }];
     kubernetes.pvc.grafana.size = "1G";
-  };
+  })]);
 }

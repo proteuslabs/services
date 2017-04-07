@@ -92,7 +92,7 @@ in {
   config = mkIf cfg.enable {
     kubernetes.deployments = listToAttrs (mapAttrsFlatten (name: token:
       nameValuePair "gitlab-runner-${name}" {
-        dependencies = ["secrets/gitlab-runner-${name}"];
+        dependencies = ["secrets/gitlab-runner-${name}" "pvc/gitlab-runner-${name}-dind"];
 
         pod.nodeSelector = cfg.nodeSelector;
 
@@ -105,16 +105,24 @@ in {
         };
 
         pod.containers.dind = {
-          image = "docker:1.12-dind";
-          security.privileged = true;
+          image = "docker:1.13-dind";
           args = ["--storage-driver" cfg.storageDriver];
+          security.privileged = true;
           requests.memory = "1024Mi";
           requests.cpu = "500m";
           limits.memory = "1024Mi";
           mounts = [{
             name = "cgroups";
             mountPath = "/sys/fs/cgroup";
+          } {
+            name = "storage";
+            mountPath = "/var/lib/docker";
           }];
+        };
+
+        pod.volumes.storage = {
+          type = "persistentVolumeClaim";
+          options.claimName = "gitlab-runner-${name}-dind";
         };
 
         pod.volumes.cgroups = {
@@ -127,6 +135,15 @@ in {
           options.secretName = "gitlab-runner-${name}";
         };
     }) cfg.runners);
+
+    kubernetes.pvc = listToAttrs (mapAttrsFlatten (name: token:
+      nameValuePair "gitlab-runner-${name}-dind"{
+    size = "100G";
+      annotations = {
+          "volume.beta.kubernetes.io/storage-class" = "default";
+        };
+      }
+    ) cfg.runners);
 
     kubernetes.secrets = listToAttrs (mapAttrsFlatten (name: token:
       nameValuePair "gitlab-runner-${name}" {

@@ -10,7 +10,7 @@ in {
 
     version = mkOption {
       description = "Version of grafana to use";
-      default = "4.1.0-beta1";
+      default = "4.2.0";
       type = types.str;
     };
 

@@ -97,7 +97,7 @@ in {
         pod.nodeSelector = cfg.nodeSelector;
 
         pod.containers.gitlab-ci-multi-runner = {
-          image = "gitlab/gitlab-runner";
+          image = "gitlab/gitlab-runner:v1.9.5";
           mounts = [{
             name = "config";
             mountPath = "/etc/gitlab-runner";

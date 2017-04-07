@@ -31,9 +31,7 @@ in {
     kubernetes.deployments.influxdb = {
       dependencies = ["services/influxdb" "pvc/influxdb"];
       pod.containers.influxdb = {
-        image = "influxdb:1.0.0";
-        env = {
-        };
+        image = "influxdb:1.1.0";
         ports = [
           { port = 8083; } # admin
           { port = 8086; } # http

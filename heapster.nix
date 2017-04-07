@@ -17,7 +17,7 @@ in {
   config = mkIf cfg.enable {
     kubernetes.deployments.heapster-monitoring = {
       pod.containers.heapster = {
-        image = "gcr.io/google_containers/heapster:v1.2.0";
+        image = "gcr.io/google_containers/heapster-amd64:v1.3.0-beta.1";
         command = [
           "/heapster"
           "--source=kubernetes.summary_api:"
@@ -29,7 +29,7 @@ in {
         limits.cpu = "100m";
       };
       pod.containers.eventer = {
-        image = "gcr.io/google_containers/heapster:v1.2.0";
+        image = "gcr.io/google_containers/heapster-amd64:v1.3.0-beta.1";
         command = [
           "/eventer"
           "--source=kubernetes:"

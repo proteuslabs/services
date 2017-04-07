@@ -28,6 +28,12 @@ in {
       description = "Logstash output config";
       type = types.lines;
     };
+
+    filterConfig = mkOption {
+      description = "Extra filter config";
+      type = types.lines;
+      default = "";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -81,6 +87,8 @@ in {
             add_field => { "_kube_name" => "%{[kubernetes][replication_controller]}" }
           }            
         }
+
+        ${cfg.filterConfig}
       }
 
       output {

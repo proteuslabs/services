@@ -68,7 +68,7 @@ in {
     storageDriver = mkOption {
       description = "Type of docker storage driver to use";
       type = types.str;
-      default = "overlay";
+      default = "overlay2";
     };
 
     runners = mkOption {

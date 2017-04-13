@@ -5,19 +5,21 @@ with lib;
 let
   cfg = config.services.kibana;
 
+  scheme = if cfg.elasticsearch.ssl then "https" else "http";
+
   url =
     if (cfg.elasticsearch.username!=null && cfg.elasticsearch.password!=null)
     then
-      "https://${cfg.elasticsearch.username}:${cfg.elasticsearch.password}@${cfg.elasticsearch.host}:${toString cfg.elasticsearch.port}"
+      "${scheme}://${cfg.elasticsearch.username}:${cfg.elasticsearch.password}@${cfg.elasticsearch.host}:${toString cfg.elasticsearch.port}"
     else
-      "https://$${cfg.elasticsearch.host}:${toString cfg.elasticsearch.port}";
+      "${scheme}://${cfg.elasticsearch.host}:${toString cfg.elasticsearch.port}";
 in {
   options.services.kibana = {
     enable = mkEnableOption "kibana service";
 
     version = mkOption {
       description = "Version of kibana to use";
-      default = "5.1.2";
+      default = "5.2.2";
       type = types.str;
     };
 
@@ -31,6 +33,12 @@ in {
       description = "Elasticsearch port";
       default = 443;
       type = types.int;
+    };
+
+    elasticsearch.ssl = mkOption {
+      description = "Enable Elasticsearch https";
+      default = true;
+      type = types.bool;
     };
 
     elasticsearch.username = mkOption {
@@ -51,7 +59,7 @@ in {
       dependencies = ["services/kibana"];
       pod.containers.kibana = {
         image = "kibana:${cfg.version}";
-        command = "/usr/share/kibana/bin/kibana -e ${url}";
+        command = ["/usr/share/kibana/bin/kibana" "-e" "${url}"];
         ports = [{ port = 5601; }];
 
         requests.memory = "256Mi";

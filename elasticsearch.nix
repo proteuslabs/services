@@ -3,7 +3,7 @@
 with lib;
 
 let
-cfg = config.services.elasticsearch;
+  cfg = config.services.elasticsearch;
 in {
   options.services.elasticsearch = {
     enable = mkEnableOption "elasticsearch service";
@@ -15,6 +15,18 @@ in {
 
     clusterName = mkOption {
       description = "Name of the cluster";
+      type = types.str;
+    };
+
+    memoryLimit = mkOption {
+      description = "Memory limit in megabytes";
+      default = 2048;
+      type = types.int;
+    };
+
+    cpuLimit = mkOption {
+      description = "CPU limit";
+      default = "250m";
       type = types.str;
     };
   };
@@ -33,6 +45,18 @@ in {
           "securityContext": {
             "privileged": true
           }
+        },
+        {
+            "name": "chown",
+            "image": "busybox",
+            "imagePullPolicy": "IfNotPresent",
+            "command": ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"],
+            "volumeMounts": [
+                {
+                  "name": "storage",
+                  "mountPath": "/usr/share/elasticsearch/data"
+                }
+            ]
         }
         ]'';
       };
@@ -40,7 +64,7 @@ in {
       pod.containers.elasticsearch = {
         image = cfg.image;
         command = ["/bin/bash" "-c" ''
-# kubernetes does not support dotted env variables
+# bash does not support dotted env variables
           env xpack.security.enabled=false http.host=0.0.0.0 transport.host=127.0.0.1 bin/es-docker
           ''];
         ports = [{ port = 9200; }];
@@ -50,11 +74,13 @@ in {
         }];
 
         env = {
-          ES_JAVA_OPTS="-Xms512m -Xmx512m";
+          ES_JAVA_OPTS="-Xms${toString cfg.memoryLimit}m -Xmx${toString cfg.memoryLimit}m";
         };
 
-        requests.memory = "4096Mi";
-        requests.cpu = "1000m";
+        requests.memory = "${toString cfg.memoryLimit}Mi";
+        requests.cpu = cfg.cpuLimit;
+        limits.memory = "${toString cfg.memoryLimit}Mi";
+        limits.cpu = cfg.cpuLimit;
 
         security.capabilities.add = ["IPC_LOCK"];
       };

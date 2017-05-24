@@ -28,4 +28,5 @@
   ./kube-lego.nix
   ./taskd.nix
   ./mongodb.nix
+  ./rippled.nix
 ]

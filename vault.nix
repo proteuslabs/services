@@ -38,9 +38,10 @@ in {
       };
 
       pod.containers.vault-ui = {
-        image = "nyxcharon/vault-ui";
+        image = "djenriquez/vault-ui";
         env = {
-          VAULT_ADDR = "http://localhost:8200";
+          VAULT_URL_DEFAULT = "http://localhost:8200";
+          VAULT_AUTH_DEFAULT = "USERNAMEPASSWORD";
         };
         requests.memory = "50Mi";
         requests.cpu = "50m";
@@ -57,7 +58,7 @@ in {
     {
       name = "vault-ui";
       port = 80;
-      targetPort = 80;
+      targetPort = 8000;
     }];
   };
 }

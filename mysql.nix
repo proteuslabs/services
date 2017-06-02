@@ -45,7 +45,7 @@ in {
   };
 
   config = mkIf cfg.enable (mkMerge [{
-    kubernetes.controllers.mysql = {
+    kubernetes.deployments.mysql = {
       dependencies = ["services/mysql" "pvc/mysql"];
 
       pod.containers.mysql = {
@@ -78,7 +78,7 @@ in {
       size = "1G";
     };
   } (mkIf (cfg.sql != null) {
-    kubernetes.controllers.mysql = {
+    kubernetes.deployments.mysql = {
       dependencies = ["secrets/mysql-init"];
 
       pod.containers.mysql = {

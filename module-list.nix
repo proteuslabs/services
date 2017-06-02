@@ -29,4 +29,7 @@
   ./taskd.nix
   ./mongodb.nix
   ./rippled.nix
+  ./mediawiki-query-service.nix
+  ./tor.nix
+  ./etcd.nix
 ]

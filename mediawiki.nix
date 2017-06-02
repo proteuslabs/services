@@ -124,10 +124,10 @@ in {
 
         ports = [{ port = 80; } { port = 443; }];
 
-        readinessProbe.httpGet = {
-          path = "/index.php/Main_Page";
-          port = 80;
-        };
+        #readinessProbe.httpGet = {
+          #path = "/index.php/Main_Page";
+          #port = 80;
+        #};
       };
 
       pod.volumes.data = {

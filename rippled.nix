@@ -55,7 +55,7 @@ n9KiYM9CgngLvtRCQHZwgC2gjpdaZcCcbt3VboxiNFcKuwFVujzS  RL4
 n9LdgEtkmGB9E2h3K4Vp7iGUaKuq23Zr32ehxiU8FWY7xoxbWTSA  RL5
 
 [node_size]
-medium
+large
 
 [ledger_history]
 12400
@@ -87,12 +87,6 @@ in {
       type = types.str;
     };
 
-    count = mkOption {
-      description = "Number of rippled servers";
-      type = types.int;
-      default = 2;
-    };
-
     extraConfig = mkOption {
       description = "Extra rippled config";
       default = "";
@@ -101,10 +95,23 @@ in {
   };
 
   config = mkIf cfg.enable {
-    kubernetes.deployments = listToAttrs (map (i: nameValuePair "rippled-${toString i}" {
-      labels.app = "rippled";
+    kubernetes.statefulSets.rippled = {
+      dependencies = ["services/rippled" "secrets/rippled-config"];
 
-      dependencies = ["services/rippled" "pvc/rippled-${toString i}" "secrets/rippled-config"];
+      # schedule one pod on one node
+      pod.annotations."scheduler.alpha.kubernetes.io/affinity" =
+        builtins.toJSON {
+          podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution = [{
+            labelSelector = {
+              matchExpressions = [{
+                key = "name";
+                operator = "In";
+                values = ["rippled"];
+              }];
+            };
+            topologyKey = "kubernetes.io/hostname";
+          }];
+        };
 
       pod.containers.rippled = {
         image = "gatehub/rippled";
@@ -117,8 +124,13 @@ in {
           mountPath = "/etc/rippled";
         }];
         ports = [{ port = 5006; } { port = 51235; }];
-        requests.memory = "6000Mi";
-        requests.cpu = "1500m";
+        requests.memory = "16000Mi";
+        requests.cpu = "2000m";
+
+        readinessProbe.httpGet = {
+          path = "/";
+          port = 5006;
+        };
       };
 
       pod.volumes.config = {
@@ -126,24 +138,14 @@ in {
         options.secretName = "rippled-config";
       };
 
-      pod.volumes.storage = {
-        type = "persistentVolumeClaim";
-        options.claimName = "rippled-${toString i}";
-      };
-    }) (range 0 (cfg.count - 1)));
-
-    kubernetes.pvc = listToAttrs (map (i: nameValuePair "rippled-${toString i}"  {
-      annotations."volume.beta.kubernetes.io/storage-class" = "fast";
-      name = "rippled-${toString i}";
-      size = "100G";
-    }) (range 0 (cfg.count - 1)));
+      volumeClaimTemplates.storage.size = cfg.storageSize;
+    };
 
     kubernetes.secrets.rippled-config = {
       secrets."rippled.conf" = pkgs.writeText "rippled.conf" rippledConfig;
     };
 
     kubernetes.services.rippled = {
-      selector.app = "rippled";
       ports = [{
         name = "websockets-alt";
         port = 5006;

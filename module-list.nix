@@ -32,4 +32,5 @@
   ./mediawiki-query-service.nix
   ./tor.nix
   ./etcd.nix
+  ./parity.nix
 ]

@@ -21,6 +21,12 @@ in {
       example = "kubernetes.io/aws-ebs";
     };
 
+    namespace = mkOption {
+      description = "Namespace to use";
+      type = types.str;
+      default = config.kubernetes.defaultNamespace;
+    };
+
     clusters = mkOption {
       description = "Defined etcd clusters";
       type = types.attrsOf (types.submodule ({ name, ... }: {
@@ -43,11 +49,14 @@ in {
 
   config = mkIf cfg.enable {
     kubernetes.deployments.etcd-operator = {
+      dependencies = ["clusterroles/etcd-operator" "clusterrolebindings/etcd-operator" "serviceaccounts/etcd-operator"];
+
+      pod.serviceAccountName = "etcd-operator";
       pod.containers.etcd-operator = {
         image = "quay.io/coreos/etcd-operator:${cfg.version}";
         command =
           ["/usr/local/bin/etcd-operator"] ++
-          (optionals (cfg.volumeProvisioner != null) "--pv-provisioner=${cfg.volumeProvisioner}s");
+          (optionals (cfg.volumeProvisioner != null) ["--pv-provisioner=${cfg.volumeProvisioner}"]);
         env = {
           MY_POD_NAMESPACE = {
             fieldRef.fieldPath = "metadata.namespace";
@@ -56,10 +65,46 @@ in {
             fieldRef.fieldPath = "metadata.name";
           };
         };
-
         requests.memory = "128Mi";
       };
     };
+
+    kubernetes.clusterRoles.etcd-operator.rules = [{
+      apiGroups = ["etcd.coreos.com"];
+      resources = ["clusters"];
+      verbs = ["*"];
+    } {
+      apiGroups = ["extensions"];
+      resources = ["thirdpartyresources"];
+      verbs = ["create"];
+    } {
+      apiGroups = ["storage.k8s.io"];
+      resources = ["storageclasses"];
+      verbs = ["create"];
+    } {
+      apiGroups = [""];
+      resources = ["pods" "services" "endpoints" "persistentvolumeclaims"];
+      verbs = ["*"];
+    } {
+      apiGroups = ["apps"];
+      resources = ["deployments"];
+      verbs = ["*"];
+    }];
+
+    kubernetes.clusterRoleBindings.etcd-operator = {
+      roleRef = {
+        apiGroup = "rbac.authorization.k8s.io";
+        kind = "ClusterRole";
+        name = "etcd-operator";
+      };
+      subjects = [{
+        kind = "ServiceAccount";
+        name = "etcd-operator";
+        namespace = cfg.namespace;
+      }];
+    };
+
+    kubernetes.serviceAccounts.etcd-operator = {};
 
     kubernetes.customResources.etcd-cluster = mapAttrs (name: config: {
       kind = "Cluster";

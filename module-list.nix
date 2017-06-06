@@ -34,4 +34,5 @@
   ./etcd.nix
   ./parity.nix
   ./kube-state-metrics.nix
+  ./prometheus-node-exporter.nix
 ]

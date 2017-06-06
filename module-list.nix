@@ -7,7 +7,7 @@
   ./gitlab-runner.nix
   ./pritunl.nix
   ./openvpn.nix
-  ./nginxingress.nix
+  ./nginx-ingress.nix
   ./mediawiki.nix
   ./influxdb.nix
   ./grafana.nix

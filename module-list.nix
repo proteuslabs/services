@@ -33,4 +33,5 @@
   ./tor.nix
   ./etcd.nix
   ./parity.nix
+  ./kube-state-metrics.nix
 ]

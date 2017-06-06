@@ -81,6 +81,8 @@ in {
           "--jsonrpc-hosts=${concatStringsSep "," cfg.jsonrpc.hosts}"
           "--port=${toString cfg.nodePort}"
           "--warp"
+          "--allow-ips=public"
+          "--max-pending-peers=32"
         ];
         mounts = [{
           name = "storage";
@@ -89,11 +91,6 @@ in {
         ports = [{ port = 8545; } { port = cfg.nodePort; }];
         requests.memory = "8000Mi";
         requests.cpu = "1000m";
-
-        #readinessProbe.httpGet = {
-          #path = "/";
-          #port = 5006;
-        #};
       };
 
       volumeClaimTemplates.storage.size = cfg.storageSize;

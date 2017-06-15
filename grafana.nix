@@ -28,8 +28,8 @@ in {
     db = {
       type = mkOption {
         description = "Database type";
-        default = "sqlite3";
-        type = types.enum ["sqlite3" "mysql" "postgres"];
+        default = null;
+        type = types.enum [null "sqlite3" "mysql" "postgres"];
       };
 
       path = mkOption {
@@ -63,6 +63,17 @@ in {
       };
     };
 
+    enableWatcher = mkOption {
+      description = "Whether to enable watcher";
+      type = types.bool;
+      default = (length (attrNames cfg.dashboards)) > 0;
+    };
+
+    dashboards = mkOption {
+      description = "Attribute set of grafana resources to deploy";
+      default = {};
+    };
+
     extraConfig = mkOption {
       description = "Grafana extra configuration options";
       type = types.attrsOf types.str;
@@ -77,9 +88,12 @@ in {
         image = "grafana/grafana:${cfg.version}";
         env = {
           GF_SERVER_ROOT_URL = cfg.rootUrl;
+          GF_SECURITY_ADMIN_USER = "admin";
           GF_SECURITY_ADMIN_PASSWORD = cfg.adminPassword;
           GF_PATHS_DATA = "/data";
           GF_USERS_ALLOW_SIGN_UP = "false";
+          GF_AUTH_BASIC_ENABLED = "true";
+          GF_AUTH_ANONYMOUS_ENABLED = "true";
           GF_DATABASE_TYPE = cfg.db.type;
           GF_DATABASE_PATH = cfg.db.path;
           GF_DATABASE_HOST = cfg.db.host;
@@ -92,6 +106,14 @@ in {
           name = "storage";
           mountPath = "/data";
         }];
+        requests = {
+          memory = "100Mi";
+          cpu = "100m";
+        };
+        limits = {
+          memory = "200Mi";
+          cpu = "200m";
+        };
 
         readinessProbe.httpGet = {
           path = "/login";
@@ -114,5 +136,41 @@ in {
       };
     };
     kubernetes.pvc.grafana.size = "1G";
+  }) (mkIf cfg.enableWatcher {
+    kubernetes.deployments.grafana = {
+      dependencies = ["configmaps/grafana-dashboards"];
+      pod.containers.watcher = {
+        image = "quay.io/coreos/grafana-watcher:v0.0.4";
+        args = [
+          "--watch-dir=/var/grafana-dashboards"
+          "--grafana-url=http://localhost:3000"
+        ];
+        env = {
+          GRAFANA_USER = "admin";
+          GRAFANA_PASSWORD = cfg.adminPassword;
+        };
+        requests = {
+          memory = "16Mi";
+          cpu = "50m";
+        };
+        limits = {
+          memory = "32Mi";
+          cpu = "100m";
+        };
+        mounts = [{
+          name = "dashboards";
+          mountPath = "/var/grafana-dashboards";
+        }];
+      };
+      pod.volumes.dashboards = {
+        type = "configMap";
+        options.name = "grafana-dashboards";
+      };
+    };
+
+    kubernetes.configMaps.grafana-dashboards.data = mapAttrs (name: value:
+      if isAttrs value then builtins.toJSON value
+      else builtins.readFile value
+    ) cfg.dashboards;
   })]);
 }

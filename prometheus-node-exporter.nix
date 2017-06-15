@@ -56,8 +56,16 @@ in {
         ] ++ cfg.extraArgs;
         ports = [{
           port = 9100;
-          #hostPort = 9100;
+          hostPort = 9100;
         }];
+        livenessProbe = {
+          httpGet = {
+            path = "/";
+            port = 9100;
+          };
+          initialDelaySeconds = 30;
+          timeoutSeconds = 1;
+        };
         #requests = {
           #memory = "30Mi";
           #cpu = "100m";
@@ -69,11 +77,11 @@ in {
         mounts = [{
           name = "proc";
           mountPath = "/host/proc";
-          #readOnly = true;
+          readOnly = true;
         } {
           name = "proc";
           mountPath = "/host/sys";
-          #readOnly = true;
+          readOnly = true;
         }] ++ (mapAttrsToList (path: name: {
           inherit (path) name hostPath mountPath readOnly;
         }) cfg.extraPaths);

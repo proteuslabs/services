@@ -91,6 +91,7 @@ in {
         ports = [{ port = 8545; } { port = cfg.nodePort; }];
         requests.memory = "8000Mi";
         requests.cpu = "1000m";
+        limits.memory = "8000Mi";
       };
 
       volumeClaimTemplates.storage.size = cfg.storageSize;

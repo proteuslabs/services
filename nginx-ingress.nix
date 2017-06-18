@@ -141,7 +141,7 @@ in {
       rules = [{
         apiGroups = [""];
         resources = ["configmaps" "endpoints" "nodes" "pods" "secrets"];
-        verbs = ["list" "watch"];
+        verbs = ["get" "list" "watch"];
       } {
         apiGroups = [""];
         resources = ["services"];

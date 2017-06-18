@@ -6,7 +6,7 @@ let
   cfg = config.services.prometheus;
 
   prometheusConfig = {
-    rule_files = ["/etc/config/rules" "/etc/config/alerts"];
+    rule_files = ["/etc/config/*.rules" "/etc/config/*.alerts"];
     scrape_configs = [
 
 			# Scrape config for prometheus itself
@@ -195,7 +195,11 @@ in {
     enable = mkEnableOption "prometheus server";
 
     alertmanager = {
-      enable = mkEnableOption "alertmanager";
+      enable = mkOption {
+        description = "Whether to enable prometheus alertmanager";
+        default = true;
+        type = types.bool;
+      };
 
       url = mkOption {
         description = "Alertmanager url";
@@ -204,16 +208,20 @@ in {
       };
     };
 
+    rules = mkOption {
+      description = "Attribute set of prometheus recording rules to deploy";
+      default = {};
+    };
+
+    alerts = mkOption {
+      description = "Attribute set of alert rules to deploy";
+      default = {};
+    };
+
     storage = {
       size = mkOption {
         description = "Prometheus storage size";
         default = "20Gi";
-        type = types.str;
-      };
-
-      class = mkOption {
-        description = "Storage class";
-        default = "default";
         type = types.str;
       };
     };
@@ -261,7 +269,6 @@ in {
         mounts = [{
           name = "config";
           mountPath = "/etc/config";
-          readOnly = true;
         }];
       };
 
@@ -269,11 +276,11 @@ in {
       pod.containers.server = {
         image = "prom/prometheus:${cfg.version}";
         args = [
-          "--config.file=/etc/config/prometheus.yml"
+          "--config.file=/etc/config/prometheus.json"
           "--storage.local.path=/data"
           "--web.console.libraries=/etc/prometheus/console_libraries"
           "--web.console.templates=/etc/prometheus/consoles"
-        ] ++ (optional (cfg.alertmanager.enable) [
+        ] ++ (optionals (cfg.alertmanager.enable) [
           "--alertmanager.url=${cfg.alertmanager.url}"
         ]) ++ cfg.extraArgs;
         ports = [{ port = 9090; }];
@@ -283,7 +290,6 @@ in {
         } {
           name = "config";
           mountPath = "/etc/config";
-          readOnly = true;
         }];
         readinessProbe = {
           httpGet = {
@@ -294,6 +300,7 @@ in {
           timeoutSeconds = 30;
         };
       };
+
       pod.volumes.config = {
         type = "configMap";
         options.name = "prometheus";
@@ -304,10 +311,15 @@ in {
       };
     };
 
-    kubernetes.configMaps.prometheus = {
-      data."prometheus.yml" =
-        (builtins.toJSON prometheusConfig);
-    };
+    kubernetes.configMaps.prometheus.data = {
+      "prometheus.json" = builtins.toJSON prometheusConfig;
+    } // (mapAttrs (name: value: 
+      if isString value then value
+      else builtins.readFile value
+    ) cfg.alerts) // (mapAttrs (name: value: 
+      if isString value then value
+      else builtins.readFile value
+    ) cfg.rules);
 
     kubernetes.services.prometheus = {
       ports = [{
@@ -333,6 +345,7 @@ in {
         apiGroups = [""];
         resources = [
           "nodes"
+          "nodes/metrics"
           "services"
           "endpoints"
           "pods"
@@ -354,14 +367,15 @@ in {
 
     services.kube-state-metrics.enable = mkDefault true;
     services.prometheus-node-exporter.enable = mkDefault true;
+    #services.prometheus-alertmanager.enable = mkDefault cfg.alertmanager.enable;
 
     services.grafana.enable = mkDefault true;
     services.grafana.dashboards = {
-      "all-nodes-dashboard.json" = ./dashboards/all-nodes-dashboard.json;
-      "deployment-dashboard.json" = ./dashboards/deployment-dashboard.json;
-      "kubernetes-pods-dashboard.json" = ./dashboards/kubernetes-pods-dashboard.json;
-      "node-dashboard.json" = ./dashboards/node-dashboard.json;
-      "resource-requests-dashboard.json" = ./dashboards/resource-requests-dashboard.json;
+      "all-nodes-dashboard.json" = ./prometheus/all-nodes-dashboard.json;
+      "deployment-dashboard.json" = ./prometheus/deployment-dashboard.json;
+      "kubernetes-pods-dashboard.json" = ./prometheus/kubernetes-pods-dashboard.json;
+      "node-dashboard.json" = ./prometheus/node-dashboard.json;
+      "resource-requests-dashboard.json" = ./prometheus/resource-requests-dashboard.json;
       "prometheus-datasource.json" = {
         access = "proxy";
         basicAuth = false;
@@ -369,6 +383,19 @@ in {
         type = "prometheus";
         url = "http://10.0.0.203:9090";
       };
+    };
+
+    services.prometheus.rules = mkDefault {
+      "kubernetes.alerts" = ./prometheus/kubernetes.rules;
+    };
+
+    services.prometheus.alerts = mkDefault {
+      "alertmanager.rules" = ./prometheus/alertmanager.rules;
+      "general.rules" = ./prometheus/alertmanager.rules;
+      "kube-apiserver.rules" = ./prometheus/kube-apiserver.rules;
+      "kube-controller-manager.rules" = ./prometheus/kube-controller-manager.rules;
+      "kube-scheduler.rules" = ./prometheus/kube-scheduler.rules;
+      "kubelet.rules" = ./prometheus/kubelet.rules;
     };
   };
 }

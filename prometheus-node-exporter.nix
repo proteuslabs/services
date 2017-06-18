@@ -63,14 +63,14 @@ in {
           initialDelaySeconds = 30;
           timeoutSeconds = 1;
         };
-        #requests = {
-          #memory = "30Mi";
-          #cpu = "100m";
-        #};
-        #limits = {
-          #memory = "50Mi";
-          #cpu = "200m";
-        #};
+        requests = {
+          memory = "100Mi";
+          cpu = "128m";
+        };
+        limits = {
+          memory = "100Mi";
+          cpu = "128m";
+        };
         mounts = [{
           name = "proc";
           mountPath = "/host/proc";

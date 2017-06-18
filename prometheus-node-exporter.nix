@@ -17,23 +17,20 @@ in {
     extraPaths = mkOption {
       description = "Extra node-exporter host paths";
       default = {};
-      type = types.attrsOf (types.submodule {
-        hostPath = mkOption {
-          description = "Host path to mount";
-          type = types.path;
-        };
+      type = types.attrsOf (types.submodule ({name, config, ...}: {
+        options = {
+          hostPath = mkOption {
+            description = "Host path to mount";
+            type = types.path;
+          };
 
-        mountPath = mkOption {
-          description = "Path where to mount";
-          type = types.path;
+          mountPath = mkOption {
+            description = "Path where to mount";
+            type = types.path;
+            default = "/host/${name}";
+          };
         };
-
-        readOnly = mkOption {
-          description = "Whether to mount read only";
-          type = types.bool;
-          default = true;
-        };
-      });
+      }));
     };
 
     extraArgs = mkOption {
@@ -82,8 +79,10 @@ in {
           name = "proc";
           mountPath = "/host/sys";
           readOnly = true;
-        }] ++ (mapAttrsToList (path: name: {
-          inherit (path) name hostPath mountPath readOnly;
+        }] ++ (mapAttrsToList (name: path: {
+          inherit name;
+          inherit (path) mountPath;
+          readOnly = true;
         }) cfg.extraPaths);
       };
 
@@ -97,7 +96,7 @@ in {
           type = "hostPath";
           options.path = "/sys";
         };
-      } // (mapAttrs (path: name: {
+      } // (mapAttrs (name: path: {
         type = "hostPath";
         options.path = path.hostPath;
       }) cfg.extraPaths);

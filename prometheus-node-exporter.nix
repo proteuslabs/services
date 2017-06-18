@@ -86,6 +86,9 @@ in {
         }) cfg.extraPaths);
       };
 
+      #pod.hostNetwork = true;
+      pod.hostPID = true;
+
       pod.volumes = {
         proc = {
           type = "hostPath";

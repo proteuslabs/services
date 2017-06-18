@@ -27,8 +27,8 @@ in {
     };
   };
 
-  config = mkIf cfg.enable (mkMerge [{
-    kubernetes.controllers.rabbitmq = {
+  config = mkIf cfg.enable {
+    kubernetes.deployments.rabbitmq = {
       dependencies = ["services/rabbitmq" "pvc/rabbitmq"];
 
       pod.containers.rabbitmq = {
@@ -52,14 +52,13 @@ in {
     };
 
     kubernetes.services.rabbitmq.ports = [
-    { port = 15672; name="def"; }
-    { port = 4369; name="second"; }
+      { port = 15672; name="monitoring"; }
+      { port = 5672; name="rabbitmq"; }
     ];
 
     kubernetes.pvc.rabbitmq = {
       name = "rabbitmq";
       size = "1G";
     };
-  }
-  ]);
+  };
 }

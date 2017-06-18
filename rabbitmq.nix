@@ -37,6 +37,7 @@ in {
           RABBITMQ_DEFAULT_USER = cfg.user;
           RABBITMQ_DEFAULT_PASS = cfg.password;
           RABBITMQ_DEFAULT_VHOST  = cfg.vhost;
+          RABBITMQ_NODENAME = "bunny@localhost";
         };
         mounts = [{
           name = "storage";

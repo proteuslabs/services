@@ -149,6 +149,7 @@ in {
         ports = [{ port = 5006; } { port = 51235; }];
         requests.memory = "16000Mi";
         requests.cpu = "2000m";
+        limits.memory = "16000Mi";
 
         readinessProbe.httpGet = {
           path = "/";

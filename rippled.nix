@@ -54,6 +54,11 @@ n9L81uNCaPgtUJfaHh89gmdvXKAmSt5Gdsw2g1iPWaPkAHW5Nm4C  RL3
 n9KiYM9CgngLvtRCQHZwgC2gjpdaZcCcbt3VboxiNFcKuwFVujzS  RL4
 n9LdgEtkmGB9E2h3K4Vp7iGUaKuq23Zr32ehxiU8FWY7xoxbWTSA  RL5
 
+${optionalString (cfg.validationSeed != null) ''
+[validation_seed]
+${cfg.validationSeed}
+''}
+
 [node_size]
 large
 
@@ -85,6 +90,12 @@ in {
       description = "Rippled storage size";
       default = "100G";
       type = types.str;
+    };
+
+    validationSeed = mkOption {
+      description = "Rippled validation seed";
+      default = null;
+      type = types.nullOr types.str;
     };
 
     peerPort = mkOption {

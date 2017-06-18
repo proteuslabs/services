@@ -60,7 +60,7 @@ ${cfg.validationSeed}
 ''}
 
 [node_size]
-large
+${cfg.nodeSize}
 
 [ledger_history]
 12400
@@ -90,6 +90,12 @@ in {
       description = "Rippled storage size";
       default = "100G";
       type = types.str;
+    };
+
+    nodeSize = mkOption {
+      description = "Rippled node size";
+      default = "large";
+      type = types.enum ["small" "medium" "large"];
     };
 
     validationSeed = mkOption {

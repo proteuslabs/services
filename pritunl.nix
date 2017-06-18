@@ -38,8 +38,8 @@ in {
         };
         security.privileged = true;
         ports = [{ port = 1194; } { port = 80; } { port = 443; }];
-        #requests.memory = "128Mi";
-        #requests.cpu = "50m";
+        requests.memory = "128Mi";
+        requests.cpu = "50m";
         mounts = [{
           name = "firewall";
           mountPath = "/etc/pritunl";

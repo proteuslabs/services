@@ -13,7 +13,7 @@ port_ws_public
 
 [port_peer]
 ip=0.0.0.0
-port=51236
+port=${toString cfg.peerPort}
 protocol=peer
 admin=127.0.0.1
 
@@ -87,6 +87,12 @@ in {
       type = types.str;
     };
 
+    peerPort = mkOption {
+      description = "Rippled peer port";
+      default = 32235;
+      type = types.int;
+    };
+
     extraConfig = mkOption {
       description = "Extra rippled config";
       default = "";
@@ -146,6 +152,7 @@ in {
     };
 
     kubernetes.services.rippled = {
+      type = "NodePort";
       ports = [{
         name = "websockets-alt";
         port = 5006;
@@ -155,7 +162,8 @@ in {
         targetPort = 5006;
       } {
         name = "p2p";
-        port = 51235;
+        port = cfg.peerPort;
+        nodePort = cfg.peerPort;
       }];
     };
   };

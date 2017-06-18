@@ -32,7 +32,7 @@ in {
       dependencies = ["services/rabbitmq" "pvc/rabbitmq"];
 
       pod.containers.rabbitmq = {
-        image = "rabbitmq:3";
+        image = "rabbitmq:3-management";
         env = {
           RABBITMQ_DEFAULT_USER = cfg.user;
           RABBITMQ_DEFAULT_PASS = cfg.password;

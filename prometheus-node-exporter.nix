@@ -76,7 +76,7 @@ in {
           mountPath = "/host/proc";
           readOnly = true;
         } {
-          name = "proc";
+          name = "sys";
           mountPath = "/host/sys";
           readOnly = true;
         }] ++ (mapAttrsToList (name: path: {

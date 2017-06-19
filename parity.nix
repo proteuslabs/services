@@ -82,6 +82,7 @@ in {
           "--port=${toString cfg.nodePort}"
           "--warp"
           "--allow-ips=public"
+          "--no-discovery"
           "--max-pending-peers=32"
         ];
         mounts = [{

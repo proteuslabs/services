@@ -44,19 +44,20 @@ in {
       kind = "daemonset";
 
       configuration = ''
-        input {
-          file {
-            path => "/var/log/containers/*.log"
-              sincedb_path => "/data/sincedb"
-          }
+      input {
+        file {
+          path => "/var/log/containers/*.log"
+          sincedb_path => "/data/sincedb"
         }
+      }
 
       filter {
-        kubernetes {}
-
         date {
-          match => [ "time", "ISO8601" ]
+          match => [ "time", "ISO8601"  ]
+          remove_field => ["time"]
         }
+
+        kubernetes {}
 
         if [kubernetes][namespace] not in [${concatMapStringsSep ","
           (n: ''"${n}"'')cfg.namespaces}] {
@@ -72,20 +73,12 @@ in {
 
         json {
           source => "message"
-        }
-
-        mutate {
-          remove_field => "message"
+          target => "data"
         }
 
         json {
-          source => "log"
-        }
-
-        if [kubernetes][replication_controller] {
-          mutate {
-            add_field => { "_kube_name" => "%{[kubernetes][replication_controller]}" }
-          }            
+          source => "[data][log]"
+          target => "data"
         }
 
         ${cfg.filterConfig}

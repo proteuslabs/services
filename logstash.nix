@@ -32,30 +32,33 @@ in {
 
   config = mkIf cfg.enable {
     kubernetes."${cfg.kind}s".logstash = {
-      dependencies = ["secrets/logstash"];
+      dependencies = ["configmaps/logstash"];
 
       pod.containers.logstash = {
         image = cfg.image;
 
-        command = ["logstash" "-f" "/etc/logstash/logstash.conf" "--auto-reload"];
+        command = [
+          "logstash" "-f" "/config/logstash.conf"
+          "--config.reload.automatic"
+        ];
 
         requests.memory = "512Mi";
         limits.memory = "1024Mi";
 
         mounts = [{
           name = "config";
-          mountPath = "/etc/logstash";
+          mountPath = "/config";
         }];
       };
 
       pod.volumes.config = {
-        type = "secret";
-        options.secretName = "logstash";
+        type = "configMap";
+        options.name = "logstash";
       };
     };
 
-    kubernetes.secrets.logstash = {
-      secrets."logstash.conf" = pkgs.writeText "logstash.conf" cfg.configuration;
+    kubernetes.configMaps.logstash = {
+      data."logstash.conf" = cfg.configuration;
     };
   };
 }

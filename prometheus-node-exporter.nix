@@ -73,7 +73,7 @@ in {
         }];
         livenessProbe = {
           httpGet = {
-            path = "/";
+            path = "/metrics";
             port = 9100;
           };
           initialDelaySeconds = 30;

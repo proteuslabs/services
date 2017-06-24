@@ -14,6 +14,20 @@ in {
       type = types.str;
     };
 
+    ignoredMountPoints = mkOption {
+      description = "Regex for ignored mount points";
+      type = types.str;
+
+      # this is ugly negative regex that ignores everyting except /host/.*
+      default = "^/(([h][^o]?(/.+)?)|([h][o][^s]?(/.+)?)|([h][o][s][^t]?(/.+)?)|([^h]?[^o]?[^s]?[^t]?(/.+)?)|([^h][^o][^s][^t](/.+)?))$";
+    };
+
+    ignoredFsTypes = mkOption {
+      description = "Regex of ignored filesystem types";
+      type = types.str;
+      default = "^(proc|sys|cgroup|securityfs|debugfs|autofs|tmpfs|sysfs|binfmt_misc|devpts|overlay|mqueue|nsfs|ramfs|hugetlbfs)$";
+    };
+
     extraPaths = mkOption {
       description = "Extra node-exporter host paths";
       default = {};
@@ -50,6 +64,8 @@ in {
         args = [
           "--collector.procfs=/host/proc"
           "--collector.sysfs=/host/sys"
+          "--collector.filesystem.ignored-mount-points=${cfg.ignoredMountPoints}"
+          "--collector.filesystem.ignored-fs-types=${cfg.ignoredFsTypes}"
         ] ++ cfg.extraArgs;
         ports = [{
           port = 9100;

@@ -393,9 +393,8 @@ in {
       "alertmanager.rules" = ./prometheus/alertmanager.rules;
       "general.rules" = ./prometheus/alertmanager.rules;
       "kube-apiserver.rules" = ./prometheus/kube-apiserver.rules;
-      "kube-controller-manager.rules" = ./prometheus/kube-controller-manager.rules;
-      "kube-scheduler.rules" = ./prometheus/kube-scheduler.rules;
       "kubelet.rules" = ./prometheus/kubelet.rules;
+      "low-disk-space.rules" = ./prometheus/low-disk-space.rules;
     };
   };
 }

@@ -6,6 +6,8 @@ let
   cfg = config.services.prometheus;
 
   prometheusConfig = {
+    global.external_labels = cfg.externalLabels;
+
     rule_files = ["/etc/config/*.rules" "/etc/config/*.alerts"];
     scrape_configs = [
 
@@ -206,6 +208,12 @@ in {
         default = "http://alertmanager:9093";
         type = types.str;
       };
+    };
+
+    externalLabels = mkOption {
+      description = "Attribute set of global labels";
+      type = types.attrs;
+      default = {};
     };
 
     rules = mkOption {

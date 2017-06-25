@@ -55,20 +55,61 @@ in {
     kubernetes.statefulSets.parity = {
       dependencies = ["services/parity"];
 
-      # schedule one pod on one node
-      pod.annotations."scheduler.alpha.kubernetes.io/affinity" =
-        builtins.toJSON {
-          podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution = [{
-            labelSelector = {
-              matchExpressions = [{
-                key = "name";
-                operator = "In";
-                values = ["parity"];
-              }];
-            };
-            topologyKey = "kubernetes.io/hostname";
-          }];
-        };
+      pod.annotations = {
+        "scheduler.alpha.kubernetes.io/affinity" =
+          builtins.toJSON {
+            podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution = [{
+              labelSelector = {
+                matchExpressions = [{
+                  key = "name";
+                  operator = "In";
+                  values = ["parity"];
+                }];
+              };
+              topologyKey = "kubernetes.io/hostname";
+            }];
+          };
+
+        "pod.beta.kubernetes.io/init-containers" = builtins.toJSON [{
+          name = "drop-private-discovery";
+          image = "alpine";
+          imagePullPolicy = "IfNotPresent";
+          command = ["/bin/sh" "-c" ''
+            apk add -U iproute2
+
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 0.0.0.0/8 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 10.0.0.0/8 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 100.64.0.0/10 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 169.254.0.0/16 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 172.16.0.0/12 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.0.0.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.0.2.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.88.99.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.168.0.0/16 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 198.18.0.0/15 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 198.51.100.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 203.0.113.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 224.0.0.0/4 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 240.0.0.0/4 -j DROP
+
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 0.0.0.0/8 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 10.0.0.0/8 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 100.64.0.0/10 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 169.254.0.0/16 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 172.16.0.0/12 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.0.0.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.0.2.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.88.99.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.168.0.0/16 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 198.18.0.0/15 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 198.51.100.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 203.0.113.0/24 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 224.0.0.0/4 -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 240.0.0.0/4 -j DROP
+          ''];
+          securityContext.privileged = true;
+        }];
+      };
 
       pod.containers.parity = {
         image = "ethcore/parity:${cfg.version}";
@@ -82,7 +123,6 @@ in {
           "--port=${toString cfg.nodePort}"
           "--warp"
           "--allow-ips=public"
-          "--no-discovery"
           "--max-pending-peers=32"
         ];
         mounts = [{

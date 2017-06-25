@@ -133,6 +133,21 @@ in {
         requests.memory = "8000Mi";
         requests.cpu = "1000m";
         limits.memory = "8000Mi";
+        readinessProbe = {
+          httpGet = {
+            path = "/";
+            port = 3000;
+          };
+          initialDelaySeconds = 30;
+          timeoutSeconds = 30;
+        };
+      };
+
+      pod.containers.status = {
+        image = "gatehub/ethmonitor";
+        requests.memory = "100Mi";
+        limits.memory = "100Mi";
+        requests.cpu = "20m";
       };
 
       volumeClaimTemplates.storage.size = cfg.storageSize;

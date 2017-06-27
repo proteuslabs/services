@@ -44,6 +44,20 @@ in {
       default = 30303;
     };
 
+    blockedIpRanges = mkOption {
+      description = "Blocked IP ranges";
+      type = types.listOf types.str;
+      default = [
+        "0.0.0.0/8" "10.0.0.0/8" "100.64.0.0/10" "169.254.0.0/16"
+        "172.16.0.0/12" "192.0.0.0/24" "192.0.2.0/24" "192.88.99.0/24"
+        "192.168.0.0/16" "198.18.0.0/15" "198.51.100.0/24" "203.0.113.0/24"
+        "224.0.0.0/4" "240.0.0.0/4" "0.0.0.0/8" "10.0.0.0/8" "100.64.0.0/10"
+        "169.254.0.0/16" "172.16.0.0/12" "192.0.0.0/24" "192.0.2.0/24"
+        "192.88.99.0/24" "192.168.0.0/16" "198.18.0.0/15" "198.51.100.0/24"
+        "203.0.113.0/24" "224.0.0.0/4" "240.0.0.0/4"
+      ];
+    };
+
     extraOptions = mkOption {
       description = "Extra parity options";
       default = [];
@@ -77,35 +91,9 @@ in {
           command = ["/bin/sh" "-c" ''
             apk add -U iproute2
 
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 0.0.0.0/8 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 10.0.0.0/8 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 100.64.0.0/10 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 169.254.0.0/16 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 172.16.0.0/12 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.0.0.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.0.2.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.88.99.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 192.168.0.0/16 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 198.18.0.0/15 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 198.51.100.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 203.0.113.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 224.0.0.0/4 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d 240.0.0.0/4 -j DROP
-
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 0.0.0.0/8 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 10.0.0.0/8 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 100.64.0.0/10 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 169.254.0.0/16 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 172.16.0.0/12 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.0.0.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.0.2.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.88.99.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 192.168.0.0/16 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 198.18.0.0/15 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 198.51.100.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 203.0.113.0/24 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 224.0.0.0/4 -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d 240.0.0.0/4 -j DROP
+            ${concatMapStrings (range: ''
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d ${range} -j DROP
+            '') cfg.blockedIpRanges}
           ''];
           securityContext.privileged = true;
         }];

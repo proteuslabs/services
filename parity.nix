@@ -10,7 +10,7 @@ in {
 
     version = mkOption {
       description = "Parity version to deploy";
-      default = "v1.6.7";
+      default = "v1.6.8";
       type = types.str;
     };
 
@@ -100,7 +100,7 @@ in {
       };
 
       pod.containers.parity = {
-        image = "ethcore/parity:${cfg.version}";
+        image = "parity/parity:${cfg.version}";
         command = [
           "/parity/parity"
           ''--jsonrpc-apis=${concatStringsSep "," cfg.jsonrpc.apis}''

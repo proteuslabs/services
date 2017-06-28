@@ -93,6 +93,7 @@ in {
 
             ${concatMapStrings (range: ''
             iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d ${range} -j DROP
+            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d ${range} -j DROP
             '') cfg.blockedIpRanges}
           ''];
           securityContext.privileged = true;

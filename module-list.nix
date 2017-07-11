@@ -37,4 +37,5 @@
   ./prometheus.nix
   ./prometheus-node-exporter.nix
   ./prometheus-alertmanager.nix
+  ./zookeeper.nix
 ]

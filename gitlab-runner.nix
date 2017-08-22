@@ -85,16 +85,28 @@ in {
 
     nodeSelector = mkOption {
       description = "Service node selector";
-      default = null;
+      default = {};
+    };
+
+    roleBindingNamespace = mkOption {
+      description = "Role binding namespace";
+      type = types.str;
     };
   };
 
   config = mkIf cfg.enable {
     kubernetes.deployments = listToAttrs (mapAttrsFlatten (name: token:
       nameValuePair "gitlab-runner-${name}" {
-        dependencies = ["secrets/gitlab-runner-${name}" "pvc/gitlab-runner-${name}-dind"];
+        dependencies = [
+          "secrets/gitlab-runner-${name}"
+          "pvc/gitlab-runner-${name}-dind"
+          "rolebindings/gitlab-runner"
+          "roles/gitlab-runner"
+          "serviceaccounts/gitlab-runner"
+        ];
 
         pod.nodeSelector = cfg.nodeSelector;
+        pod.serviceAccountName = "gitlab-runner";
 
         pod.containers.gitlab-ci-multi-runner = {
           image = "gitlab/gitlab-runner:v1.9.5";
@@ -156,5 +168,38 @@ in {
         '';
       }
     ) cfg.runners);
+
+    kubernetes.roleBindings.gitlab-runner = {
+      namespace = cfg.roleBindingNamespace;
+      roleRef = {
+        apiGroup = "rbac.authorization.k8s.io";
+        kind = "Role";
+        name = "gitlab-runner";
+      };
+      subjects = [{
+        kind = "ServiceAccount";
+        name = "gitlab-runner";
+        namespace = config.kubernetes.defaultNamespace;
+      }];
+    };
+
+    kubernetes.roles.gitlab-runner = {
+      namespace = cfg.roleBindingNamespace;
+      rules = [{
+        apiGroups = [""];
+        resources = [
+          "deployments"
+        ];
+        verbs = ["patch"];
+      } {
+        apiGroups = ["extensions" "apps"];
+        resources = [
+          "deployments"
+        ];
+        verbs = ["*"];
+      }];
+    };
+
+    kubernetes.serviceAccounts.gitlab-runner = {};
   };
 }

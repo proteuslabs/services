@@ -411,7 +411,7 @@ in {
         basicAuth = false;
         name = "prometheus";
         type = "prometheus";
-        url = "http://10.0.0.203:9090";
+        url = "http://prometheus:9090";
       };
     };
 

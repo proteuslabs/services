@@ -79,14 +79,6 @@ in {
           initialDelaySeconds = 30;
           timeoutSeconds = 1;
         };
-        requests = {
-          memory = "100Mi";
-          cpu = "128m";
-        };
-        limits = {
-          memory = "100Mi";
-          cpu = "128m";
-        };
         mounts = [{
           name = "proc";
           mountPath = "/host/proc";

@@ -16,7 +16,7 @@ in {
 
     namespace = mkOption {
       description = "Namespace to deploy to";
-      default = "kube-system";
+      default = config.kubernetes.defaultNamespace;
       type = types.str;
     };
   };

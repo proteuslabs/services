@@ -190,7 +190,7 @@ let
 					target_label = "kubernetes_pod_name";
 				}];
 			}
-		];
+		] ++ cfg.extraScrapeConfigs;
   };
 in {
   options.services.prometheus = {
@@ -250,6 +250,12 @@ in {
       description = "Prometheus extra config";
       type = types.attrs;
       default = {};
+    };
+
+    extraScrapeConfigs = mkOption {
+      description = "Prometheus extra scrape configs";
+      type = types.listOf types.attrs;
+      default = [];
     };
   };
 

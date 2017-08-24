@@ -381,6 +381,7 @@ in {
 
     services.kube-state-metrics.enable = mkDefault true;
     services.prometheus-node-exporter.enable = mkDefault true;
+    services.prometheus-pushgateway.enable = mkDefault true;
     services.prometheus-alertmanager.enable = mkDefault cfg.alertmanager.enable;
 
     services.grafana.enable = mkDefault true;

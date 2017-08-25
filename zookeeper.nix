@@ -92,10 +92,18 @@ in {
       default = "INFO";
     };
 
-    storage.size = mkOption {
-      description = "ZooKeeper storage size";
-      type = types.str;
-      default = "50Gi";
+    storage = {
+      size = mkOption {
+        description = "ZooKeeper storage size";
+        type = types.str;
+        default = "50Gi";
+      };
+
+      class = mkOption {
+        description = "ZooKeeper storage class";
+        type = types.str;
+        default = "default";
+      };
     };
   };
 
@@ -190,6 +198,7 @@ in {
 
       volumeClaimTemplates.storage = {
         size = cfg.storage.size;
+        storageClassName = cfg.storage.class;
       };
     };
 

@@ -227,6 +227,21 @@ in {
         "services/prometheus-alertmanager"
       ];
 
+      # schedule one pod on one node
+      pod.annotations."scheduler.alpha.kubernetes.io/affinity" =
+        builtins.toJSON {
+          podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution = [{
+            labelSelector = {
+              matchExpressions = [{
+                key = "name";
+                operator = "In";
+                values = ["prometheus-alertmanager"];
+              }];
+            };
+            topologyKey = "kubernetes.io/hostname";
+          }];
+        };
+
       replicas = mkDefault 2;
 
       # reloads alertmanager configuration

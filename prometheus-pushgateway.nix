@@ -26,7 +26,7 @@ in {
     services.prometheus.extraScrapeConfigs = [{
       job_name = "prometheus-pushgateway";
       honor_labels = true;
-      kubernetes_sd_configs.role = "service";
+      kubernetes_sd_configs = [{role = "service";}];
       relabel_configs = [{
         source_labels = ["__meta_kubernetes_service_annotation_prometheus_io_probe"];
         action = "keep";

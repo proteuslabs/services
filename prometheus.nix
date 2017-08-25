@@ -213,7 +213,7 @@ in {
 
       url = mkOption {
         description = "Alertmanager url";
-        default = "http://alertmanager:9093";
+        default = "http://prometheus-alertmanager:9093";
         type = types.str;
       };
     };

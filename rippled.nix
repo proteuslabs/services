@@ -86,10 +86,24 @@ in {
   options.services.rippled = {
     enable = mkEnableOption "redis service";
 
-    storageSize = mkOption {
-      description = "Rippled storage size";
-      default = "100G";
-      type = types.str;
+    replicas = mkOption {
+      description = "Ripple replicas";
+      type = types.int;
+      default = 3;
+    };
+
+    storage = {
+      size = mkOption {
+        description = "Rippled storage size";
+        default = "69G";
+        type = types.str;
+      };
+
+      class = mkOption {
+        description = "Rippled storage class";
+        default = "default";
+        type = types.str;
+      };
     };
 
     nodeSize = mkOption {
@@ -119,6 +133,9 @@ in {
 
   config = mkIf cfg.enable {
     kubernetes.statefulSets.rippled = {
+      replicas = cfg.replicas;
+      podManagementPolicy = "Parallel";
+
       dependencies = ["services/rippled" "secrets/rippled-config"];
 
       # schedule one pod on one node
@@ -151,10 +168,23 @@ in {
         requests.cpu = "2000m";
         limits.memory = "16000Mi";
 
-        readinessProbe.httpGet = {
-          path = "/";
-          port = 5006;
+        readinessProbe = {
+          httpGet = {
+            path = "/";
+            port = 3000;
+          };
+          initialDelaySeconds = 30;
+          timeoutSeconds = 30;
         };
+      };
+
+      pod.containers.status = {
+        image = "gatehub/rippledmonitor";
+        imagePullPolicy = "IfNotPresent";
+
+        requests.memory = "100Mi";
+        limits.memory = "100Mi";
+        requests.cpu = "20m";
       };
 
       pod.volumes.config = {
@@ -162,7 +192,10 @@ in {
         options.secretName = "rippled-config";
       };
 
-      volumeClaimTemplates.storage.size = cfg.storageSize;
+      volumeClaimTemplates.storage= {
+        size = cfg.storage.size;
+        storageClassName = cfg.storage.class;
+      };
     };
 
     kubernetes.secrets.rippled-config = {

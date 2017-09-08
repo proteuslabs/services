@@ -132,7 +132,7 @@ in {
 
           type = mkOption {
             description = "Receiver name (defaults to attr name)";
-            type = types.enum ["email" "hipchat" "pagerduty" "pushover" "slack" "opsgenie" "webhook"];
+            type = types.enum ["email" "hipchat" "pagerduty" "pushover" "slack" "opsgenie" "webhook" "victorops"];
           };
 
           options = mkOption {
@@ -283,6 +283,7 @@ in {
           timeoutSeconds = 30;
         };
       };
+
       pod.volumes.config = {
         type = "configMap";
         options.name = "prometheus-alertmanager";

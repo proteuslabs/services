@@ -158,15 +158,19 @@ let
           }];
         }
 
-        # Example scrape config for pods
-        #
-        # The relabeling allows the actual pod scrape endpoint to be configured via the
-        # following annotations:
-        #
-        # * `prometheus.io/scrape`: Only scrape pods that have a value of `true`
-        # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
-        # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the
-        # pod's declared ports (default is a port-free target if none are declared).
+				# Example scrape config for pods
+				#
+				# The relabeling allows the actual pod scrape endpoint to be configured via the
+				# following annotations:
+				#
+				# * `prometheus.io/scrape`: Only scrape pods that have a value of `true`
+				# * `prometheus.io/path`: If the metrics path is not `/metrics` override this. This
+				#    will be the same for every container in the pod that is scraped.
+				# * this will scrape every container in a pod with `prometheus.io/scrape` set to true and the
+				#		port is name `metrics` in the container
+				# * note `prometheus.io/port` is no longer honored. You must name the port(s) to scrape `metrics`
+				#   Also, in some of the issues I read, there was mention of a container role, but I couldn't get 
+				#   that to work - or find any more info on it.
         {
           job_name = "kubernetes-pods";
           kubernetes_sd_configs = [{role = "pod";}];
@@ -175,12 +179,16 @@ let
             action = "keep";
             regex = true;
           } {
+            source_labels = ["__meta_kubernetes_pod_container_port_name"];
+            action = "keep";
+            regex = "metrics";
+          } {
             source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"];
             action = "replace";
             target_label = "__metrics_path__";
             regex = "(.+)";
           } {
-            source_labels = ["__address__" "__meta_kubernetes_pod_annotation_prometheus_io_port"];
+            source_labels = ["__address__" "__meta_kubernetes_pod_container_port_number"];
             action = "replace";
             regex = "([^:]+)(?::\d+)?;(\d+)";
             replacement = "$1:$2";

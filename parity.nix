@@ -14,10 +14,18 @@ in {
       type = types.str;
     };
 
-    storageSize = mkOption {
-      description = "Parity storage size";
-      default = "100G";
-      type = types.str;
+    storage = {
+      size = mkOption {
+        description = "Parity storage size";
+        default = "45G";
+        type = types.str;
+      };
+
+      class = mkOption {
+        description = "Parity storage class";
+        default = "default";
+        type = types.str;
+      };
     };
 
     jsonrpc.apis = mkOption {
@@ -130,16 +138,23 @@ in {
           initialDelaySeconds = 30;
           timeoutSeconds = 30;
         };
+
+        security.capabilities.add = ["NET_ADMIN"];
       };
 
       pod.containers.status = {
         image = "gatehub/ethmonitor";
+        imagePullPolicy = "IfNotPresent";
+
         requests.memory = "100Mi";
         limits.memory = "100Mi";
         requests.cpu = "20m";
       };
 
-      volumeClaimTemplates.storage.size = cfg.storageSize;
+      volumeClaimTemplates.storage = {
+        size = cfg.storage.size;
+        storageClassName = cfg.storage.class;
+      };
     };
 
     kubernetes.services.parity = {

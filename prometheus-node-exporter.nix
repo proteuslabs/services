@@ -25,7 +25,7 @@ in {
     ignoredFsTypes = mkOption {
       description = "Regex of ignored filesystem types";
       type = types.str;
-      default = "^(proc|sys|cgroup|securityfs|debugfs|autofs|tmpfs|sysfs|binfmt_misc|devpts|overlay|mqueue|nsfs|ramfs|hugetlbfs)$";
+      default = "^(proc|sys|cgroup|securityfs|debugfs|autofs|tmpfs|sysfs|binfmt_misc|devpts|overlay|mqueue|nsfs|ramfs|hugetlbfs|pstore)$";
     };
 
     extraPaths = mkOption {

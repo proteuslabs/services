@@ -77,6 +77,9 @@ in {
     kubernetes.statefulSets.parity = {
       dependencies = ["services/parity"];
 
+      replicas = mkDefault 2;
+      podManagementPolicy = "Parallel";
+
       pod.annotations = {
         "scheduler.alpha.kubernetes.io/affinity" =
           builtins.toJSON {

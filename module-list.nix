@@ -39,5 +39,6 @@
   ./prometheus-alertmanager.nix
   ./prometheus-pushgateway.nix
   ./zookeeper.nix
+  ./elasticsearch-cluster.nix
   ./elasticsearch-log-exporter.nix
 ]

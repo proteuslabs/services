@@ -23,6 +23,7 @@ in {
     mongodbUri = mkOption {
       description = "URI for mongodb database";
       type = types.str;
+      default = "mongodb://mongodb/pritunl";
     };
   };
 

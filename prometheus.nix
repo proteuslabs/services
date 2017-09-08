@@ -436,7 +436,7 @@ in {
       "kubernetes.alerts" = ./prometheus/kubernetes.rules;
     };
 
-    services.prometheus.alerts = mkDefault {
+    services.prometheus.alerts = {
       "alertmanager.rules" = ./prometheus/alertmanager.rules;
       "general.rules" = ./prometheus/alertmanager.rules;
       "kube-apiserver.rules" = ./prometheus/kube-apiserver.rules;

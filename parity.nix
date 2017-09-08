@@ -94,37 +94,32 @@ in {
               topologyKey = "kubernetes.io/hostname";
             }];
           };
-
-        "pod.beta.kubernetes.io/init-containers" = builtins.toJSON [{
-          name = "drop-private-discovery";
-          image = "alpine";
-          imagePullPolicy = "IfNotPresent";
-          command = ["/bin/sh" "-c" ''
-            apk add -U iproute2
-
-            ${concatMapStrings (range: ''
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d ${range} -j DROP
-            iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d ${range} -j DROP
-            '') cfg.blockedIpRanges}
-          ''];
-          securityContext.privileged = true;
-        }];
       };
 
       pod.containers.parity = {
         image = "parity/parity:${cfg.version}";
-        command = [
-          "/parity/parity"
-          ''--jsonrpc-apis=${concatStringsSep "," cfg.jsonrpc.apis}''
-          "--jsonrpc-interface=all"
-          "--geth"
-          "--chain=${cfg.chain}"
-          "--jsonrpc-hosts=${concatStringsSep "," cfg.jsonrpc.hosts}"
-          "--port=${toString cfg.nodePort}"
-          "--warp"
-          "--allow-ips=public"
-          "--max-pending-peers=32"
-        ];
+        imagePullPolicy = "IfNotPresent";
+        command = ["sh" "-c" ''
+          apt update
+          apt install -y iptables
+
+          ${concatMapStrings (range: ''
+          iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p tcp -s 0/0 -d ${range} -j DROP
+          iptables -A OUTPUT -o eth0 -m state ! --state ESTABLISHED -p udp -s 0/0 -d ${range} -j DROP
+          '') cfg.blockedIpRanges}
+
+          exec /parity/parity \
+            --jsonrpc-apis=${concatStringsSep "," cfg.jsonrpc.apis} \
+            --jsonrpc-cors="*" \
+            --jsonrpc-interface=all \
+            --geth \
+            --chain=${cfg.chain} \
+            --jsonrpc-hosts=${concatStringsSep "," cfg.jsonrpc.hosts} \
+            --port=${toString cfg.nodePort} \
+            --warp \
+            --allow-ips=public \
+            --max-pending-peers=32
+        ''];
         mounts = [{
           name = "storage";
           mountPath = "/root/.local/share/io.parity.ethereum";

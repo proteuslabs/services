@@ -108,7 +108,7 @@ in {
     version = mkOption {
       description = "Prometheus alertmanager server version";
       type = types.str;
-      default = "v0.7.1";
+      default = "v0.8.0";
     };
 
     resolveTimeout = mkOption {

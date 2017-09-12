@@ -50,7 +50,12 @@ in {
 
   config = mkIf cfg.enable {
     kubernetes.deployments.etcd-operator = {
-      dependencies = ["clusterroles/etcd-operator" "clusterrolebindings/etcd-operator" "serviceaccounts/etcd-operator"];
+      dependencies = [
+        "customresourcedefinitions/etcdclusters"
+        "clusterroles/etcd-operator"
+        "clusterrolebindings/etcd-operator"
+        "serviceaccounts/etcd-operator"
+      ];
 
       pod.serviceAccountName = "etcd-operator";
       pod.containers.etcd-operator = {
@@ -106,6 +111,16 @@ in {
     };
 
     kubernetes.serviceAccounts.etcd-operator = {};
+
+    kubernetes.customResourceDefinitions.etcdclusters = {
+      group = "etcd.database.coreos.com";
+      version = "v1beta2";
+      names = {
+        plural = "etcdclusters";
+        kind = "EtcdCluster";
+        shortNames = ["etcd"];
+      };
+    };
 
     kubernetes.customResources.etcd-cluster = mapAttrs (name: config: {
       kind = "Cluster";

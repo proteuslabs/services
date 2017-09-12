@@ -123,8 +123,8 @@ in {
     };
 
     kubernetes.customResources.etcd-cluster = mapAttrs (name: config: {
-      kind = "Cluster";
-      apiVersion = "etcd.coreos.com/v1beta1";
+      kind = "EtcdCluster";
+      apiVersion = "etcd.database.coreos.com/v1beta2";
       extra.spec = {
         inherit (config) size version;
       };

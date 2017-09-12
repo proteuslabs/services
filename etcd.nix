@@ -43,6 +43,32 @@ in {
             type = types.str;
             default = "3.1.8";
           };
+
+          backup = {
+            backupIntervalInSecond = mkOption {
+              description = "Etcd cluster backup interval in seconds";
+              type = types.int;
+              default = 30;
+            };
+
+            maxBackups = mkOption {
+              description = "Maximum number of backups to keep";
+              type = types.int;
+              default = 5;
+            };
+
+            storageType = mkOption {
+              description = "Backup storage type";
+              type = types.str;
+              default = "PersistentVolume";
+            };
+
+            pv.volumeSizeInMB = mkOption {
+              description = "Persistent volume size in MB";
+              type = types.int;
+              default = 512;
+            };
+          };
         };
       }));
     };
@@ -127,6 +153,13 @@ in {
       apiVersion = "etcd.database.coreos.com/v1beta2";
       extra.spec = {
         inherit (config) size version;
+        backup = {
+          inherit (config.backup) backupIntervalInSecond maxBackups storageType;
+        } // (optionalAttrs (config.backup.storageType == "PersistentVolume") {
+          pv = {
+            inherit (config.backup.pv) volumeSizeInMB;
+          };
+        });
       };
     }) cfg.clusters;
   };

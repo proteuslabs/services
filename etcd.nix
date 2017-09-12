@@ -10,7 +10,7 @@ in {
 
     version = mkOption {
       description = "Version of etcd operator to use";
-      default = "v0.3.0";
+      default = "v0.5.1";
       type = types.str;
     };
 

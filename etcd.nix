@@ -29,6 +29,7 @@ in {
 
     clusters = mkOption {
       description = "Defined etcd clusters";
+      default = {};
       type = types.attrsOf (types.submodule ({ name, ... }: {
         options = {
           size = mkOption {
@@ -70,20 +71,20 @@ in {
     };
 
     kubernetes.clusterRoles.etcd-operator.rules = [{
-      apiGroups = ["etcd.coreos.com"];
-      resources = ["clusters"];
+      apiGroups = ["etcd.database.coreos.com"];
+      resources = ["etcdclusters"];
       verbs = ["*"];
     } {
-      apiGroups = ["extensions"];
-      resources = ["thirdpartyresources"];
-      verbs = ["create"];
+      apiGroups = ["apiextensions.k8s.io"];
+      resources = ["customresourcedefinitions"];
+      verbs = ["*"];
     } {
       apiGroups = ["storage.k8s.io"];
       resources = ["storageclasses"];
-      verbs = ["create"];
+      verbs = ["*"];
     } {
       apiGroups = [""];
-      resources = ["pods" "services" "endpoints" "persistentvolumeclaims"];
+      resources = ["pods" "services" "endpoints" "persistentvolumeclaims" "events"];
       verbs = ["*"];
     } {
       apiGroups = ["apps"];

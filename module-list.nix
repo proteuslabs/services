@@ -41,4 +41,5 @@
   ./zookeeper.nix
   ./elasticsearch-cluster.nix
   ./elasticsearch-log-exporter.nix
+  ./deployer.nix
 ]

@@ -61,7 +61,9 @@ let
     };
 
     routes = mkOption {
-      type = types.attrsOf (types.submodule routeOptions);
+      type = types.attrsOf (types.submodule {
+        options = routeOptions;
+      });
       description = "Child routes";
       default = {};
     };

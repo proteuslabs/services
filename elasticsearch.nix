@@ -29,6 +29,12 @@ in {
       default = "250m";
       type = types.str;
     };
+
+    storageSize = mkOption {
+      description = "Storage size of volume";
+      default = "10G";
+      type = types.str;
+    };
   };
 
   config = mkIf cfg.enable {
@@ -74,7 +80,7 @@ in {
         }];
 
         env = {
-          ES_JAVA_OPTS="-Xms${toString cfg.memoryLimit}m -Xmx${toString cfg.memoryLimit}m";
+          ES_JAVA_OPTS="-Xms${toString (cfg.memoryLimit * 3 / 4)}m -Xmx${toString (cfg.memoryLimit * 3 / 4)}m";
         };
 
         requests.memory = "${toString cfg.memoryLimit}Mi";
@@ -93,6 +99,6 @@ in {
 
     kubernetes.services.elasticsearch.ports = [{ port = 9200; }];
 
-    kubernetes.pvc.elasticsearch.size = mkDefault "1G";
+    kubernetes.pvc.elasticsearch.size = mkDefault cfg.storageSize;
   };
 }

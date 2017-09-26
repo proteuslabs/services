@@ -59,6 +59,19 @@ let
         type = types.bool;
         default = cfg.defaults.preventDestroy;
       };
+      state = {
+        path = mkOption {
+          description = "TF import file path for deployer job";
+          type = types.nullOr types.path;
+          default = null;
+        };
+        cmd = mkOption {
+          description = "Import cmds flags to `terraform import`";
+          type = types.str;
+          default = "";
+          example = "mysql_database.database1 database1";
+        };
+      };
       defaults = mkDefaultsOptions [ "resource" "provider" "output" "module" ] cfg.deployers.${name};
     } // (mkSectionsOptions [ "resource" "variable" "data" "provider" "output" "locals" "module" "terraform" ]);
   };
@@ -95,7 +108,9 @@ let
   }; }) (filterAttrs (n: v: v.enable) cfg.deployers);
 
   deployments = mapAttrs' (deployerName: deployer: nameValuePair "deployer-${deployer.name}" {
-    dependencies = ["configmaps/deployer-${deployer.name}"];
+    dependencies = [
+      "configmaps/deployer-${deployer.name}"
+    ];
 
     pod.containers.deployer = {
       image = "matejc/deployer:${deployer.version}";
@@ -106,8 +121,10 @@ let
         EXIT_ON_ERROR = "1";
       };
 
-      requests.memory = "256Mi";
-      requests.cpu = "500m";
+      requests.memory = "128Mi";
+      requests.cpu = "50m";
+      limits.memory = "128Mi";
+      limits.cpu = "50m";
 
       mounts = [{
         name = "resources";
@@ -120,6 +137,29 @@ let
       options.name = "deployer-${deployer.name}";
     };
   }) (filterAttrs (n: v: v.enable) cfg.deployers);
+
+  jobs = mapAttrs' (deployerName: deployer: nameValuePair "deployer-importer-${deployer.name}" {
+    pod.restartPolicy = "Never";
+
+    pod.containers.importer = {
+      image = "matejc/deployer:${deployer.version}";
+
+      command = [ "src/import.sh" ];
+
+      env = {
+        LOCK_ENDPOINT = deployer.lockEndpoint;
+      } // optionalAttrs (deployer.state.path != null) {
+        IMPORT_TF = builtins.readFile deployer.state.path;
+        IMPORT_CMD = deployer.state.cmd;
+      };
+
+      requests.memory = "128Mi";
+      requests.cpu = "50m";
+      limits.memory = "128Mi";
+      limits.cpu = "50m";
+    };
+  }) (filterAttrs (n: v: v.enable) cfg.deployers);
+
 in {
   options.services.deployer = {
     defaults = {
@@ -154,5 +194,6 @@ in {
   config = {
     kubernetes.configMaps = configMaps;
     kubernetes.deployments = deployments;
+    kubernetes.jobs = jobs;
   };
 }

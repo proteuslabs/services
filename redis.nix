@@ -23,7 +23,7 @@ in {
 
   config = mkIf cfg.enable (mkMerge [
   {
-    kubernetes.controllers.redis = {
+    kubernetes.deployments.redis = {
       dependencies = ["services/redis"];
 
       pod.containers.redis = {
@@ -41,7 +41,7 @@ in {
 
     kubernetes.services.redis.ports = [{ port = 6379; }];
   } (mkIf cfg.persistent {
-    kubernetes.controllers.redis = {
+    kubernetes.deployments.redis = {
       dependencies = ["pvc/redis"];
 
       pod.volumes.storage = {

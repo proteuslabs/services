@@ -64,7 +64,7 @@ in {
       pod.containers.elasticsearch = {
         image = cfg.image;
         command = ["/bin/bash" "-c" ''
-# bash does not support dotted env variables
+          # bash does not support dotted env variables
           env xpack.security.enabled=false http.host=0.0.0.0 transport.host=127.0.0.1 bin/es-docker
           ''];
         ports = [{ port = 9200; }];

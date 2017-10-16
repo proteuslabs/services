@@ -18,11 +18,19 @@ in {
       description = "Vault configuration file content";
       type = types.attrs;
     };
+
+    replicas = mkOption {
+      description = "Number of vault replicas to deploy";
+      default = 2;
+      type = types.int;
+    };
   };
 
   config = mkIf cfg.enable {
     kubernetes.deployments.vault = {
       dependencies = ["services/vault"];
+
+      replicas = cfg.replicas;
 
       pod.containers.vault = {
         image = "vault";

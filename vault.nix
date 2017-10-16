@@ -38,6 +38,9 @@ in {
         security.capabilities.add = ["IPC_LOCK"];
         env = {
           VAULT_LOCAL_CONFIG = builtins.toJSON cfg.configuration;
+          SKIP_SETCAP = "true";
+          VAULT_CLUSTER_INTERFACE = "eth0";
+          VAULT_REDIRECT_INTERFACE = "eth0";
         };
         requests.memory = "50Mi";
         requests.cpu = "50m";

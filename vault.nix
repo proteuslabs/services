@@ -46,6 +46,14 @@ in {
         requests.cpu = "50m";
         limits.memory = "128Mi";
         limits.cpu = "500m";
+        readinessProbe = {
+          httpGet = {
+            path = "/v1/sys/leader";
+            port = 8200;
+          };
+          initialDelaySeconds = 30;
+          timeoutSeconds = 30;
+        };
       };
 
       pod.containers.vault-ui = {

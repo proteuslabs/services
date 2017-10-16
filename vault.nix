@@ -34,7 +34,7 @@ in {
 
       pod.containers.vault = {
         image = "vault";
-        args = ["vault" "server" "-config=/vault/config/"];
+        args = ["vault" "server" "-config=/vault/config"];
         security.capabilities.add = ["IPC_LOCK"];
         env = {
           VAULT_LOCAL_CONFIG = builtins.toJSON cfg.configuration;

@@ -188,8 +188,8 @@ in {
       };
 
       pod.volumes.config = {
-        type = "secret";
-        options.secretName = "rippled-config";
+        type = "configMap";
+        options.name = "rippled";
       };
 
       volumeClaimTemplates.storage= {
@@ -198,9 +198,7 @@ in {
       };
     };
 
-    kubernetes.secrets.rippled-config = {
-      secrets."rippled.conf" = pkgs.writeText "rippled.conf" rippledConfig;
-    };
+    kubernetes.configMaps.rippled.data."rippled.conf" = rippledConfig;
 
     kubernetes.services.rippled = {
       type = "NodePort";

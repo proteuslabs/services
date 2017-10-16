@@ -42,4 +42,5 @@
   ./elasticsearch-cluster.nix
   ./elasticsearch-log-exporter.nix
   ./vault-controller.nix
+  ./deployer.nix
 ]

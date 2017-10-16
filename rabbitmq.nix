@@ -23,7 +23,7 @@ in {
     vhost = mkOption {
       description = "Set default vhost name";
       type = types.nullOr types.lines;
-      default = "rabbit-mq";
+      default = null;
     };
   };
 

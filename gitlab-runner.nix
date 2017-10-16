@@ -98,7 +98,7 @@ in {
     kubernetes.deployments = listToAttrs (mapAttrsFlatten (name: token:
       nameValuePair "gitlab-runner-${name}" {
         dependencies = [
-          "secrets/gitlab-runner-${name}"
+          "configmaps/gitlab-runner-${name}"
           "pvc/gitlab-runner-${name}-dind"
           "rolebindings/gitlab-runner"
           "roles/gitlab-runner"
@@ -143,8 +143,8 @@ in {
         };
 
         pod.volumes.config = {
-          type = "secret";
-          options.secretName = "gitlab-runner-${name}";
+          type = "configMap";
+          options.name = "gitlab-runner-${name}";
         };
     }) cfg.runners);
 
@@ -157,15 +157,15 @@ in {
       }
     ) cfg.runners);
 
-    kubernetes.secrets = listToAttrs (mapAttrsFlatten (name: token:
+    kubernetes.configMaps = listToAttrs (mapAttrsFlatten (name: token:
       nameValuePair "gitlab-runner-${name}" {
-        secrets."config.toml" = pkgs.runCommand "config.toml" {
+        data."config.toml" = builtins.readFile (pkgs.runCommand "config.toml" {
           buildInputs = [pkgs.remarshal];
         } ''
           remarshal -if json -of toml -i ${
             pkgs.writeText "config.json" (builtins.toJSON (genConfig name token))
           } > $out
-        '';
+        '');
       }
     ) cfg.runners);
 

@@ -73,10 +73,7 @@ in {
 
     kubernetes.services.mysql.ports = [{ port = 3306; }];
 
-    kubernetes.pvc.mysql = {
-      name = "mysql";
-      size = "1G";
-    };
+    kubernetes.pvc.mysql.size = "1G";
   } (mkIf (cfg.sql != null) {
     kubernetes.deployments.mysql = {
       dependencies = ["secrets/mysql-init"];

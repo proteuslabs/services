@@ -24,6 +24,7 @@
   ./tick.nix
   ./heapster.nix
   ./vault.nix
+  ./vault-ui.nix
   ./aws-es-kibana.nix
   ./kube-lego.nix
   ./taskd.nix

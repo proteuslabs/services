@@ -106,8 +106,8 @@ let
         EXIT_ON_ERROR = "1";
       };
 
-      requests.memory = "256Mi";
-      requests.cpu = "500m";
+      requests.memory = "100Mi";
+      requests.cpu = "100m";
 
       mounts = [{
         name = "resources";

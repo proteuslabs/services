@@ -55,29 +55,12 @@ in {
           timeoutSeconds = 30;
         };
       };
-
-      pod.containers.vault-ui = {
-        image = "djenriquez/vault-ui";
-        env = {
-          VAULT_URL_DEFAULT = "http://localhost:8200";
-          VAULT_AUTH_DEFAULT = "USERNAMEPASSWORD";
-        };
-        requests.memory = "50Mi";
-        requests.cpu = "50m";
-        limits.memory = "128Mi";
-        limits.cpu = "500m";
-      };
     };
 
     kubernetes.services.vault.ports = [{
       name = "vault";
       port = 8200;
       targetPort = 8200;
-    }
-    {
-      name = "vault-ui";
-      port = 80;
-      targetPort = 8000;
     }];
   };
 }

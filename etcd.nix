@@ -74,93 +74,96 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
-    kubernetes.deployments.etcd-operator = {
-      dependencies = [
-        "customresourcedefinitions/etcdclusters"
-        "clusterroles/etcd-operator"
-        "clusterrolebindings/etcd-operator"
-        "serviceaccounts/etcd-operator"
-      ];
+  config = mkMerge [
+    (mkIf cfg.enable {
+      kubernetes.deployments.etcd-operator = {
+        dependencies = [
+          "customresourcedefinitions/etcdclusters"
+          "clusterroles/etcd-operator"
+          "clusterrolebindings/etcd-operator"
+          "serviceaccounts/etcd-operator"
+        ];
 
-      pod.serviceAccountName = "etcd-operator";
-      pod.containers.etcd-operator = {
-        image = "quay.io/coreos/etcd-operator:${cfg.version}";
-        command =
-          ["/usr/local/bin/etcd-operator"] ++
-          (optionals (cfg.volumeProvisioner != null) ["--pv-provisioner=${cfg.volumeProvisioner}"]);
-        env = {
-          MY_POD_NAMESPACE = {
-            fieldRef.fieldPath = "metadata.namespace";
+        pod.serviceAccountName = "etcd-operator";
+        pod.containers.etcd-operator = {
+          image = "quay.io/coreos/etcd-operator:${cfg.version}";
+          command =
+            ["/usr/local/bin/etcd-operator"] ++
+            (optionals (cfg.volumeProvisioner != null) ["--pv-provisioner=${cfg.volumeProvisioner}"]);
+          env = {
+            MY_POD_NAMESPACE = {
+              fieldRef.fieldPath = "metadata.namespace";
+            };
+            MY_POD_NAME = {
+              fieldRef.fieldPath = "metadata.name";
+            };
           };
-          MY_POD_NAME = {
-            fieldRef.fieldPath = "metadata.name";
-          };
+          requests.memory = "128Mi";
         };
-        requests.memory = "128Mi";
       };
-    };
 
-    kubernetes.clusterRoles.etcd-operator.rules = [{
-      apiGroups = ["etcd.database.coreos.com"];
-      resources = ["etcdclusters"];
-      verbs = ["*"];
-    } {
-      apiGroups = ["apiextensions.k8s.io"];
-      resources = ["customresourcedefinitions"];
-      verbs = ["*"];
-    } {
-      apiGroups = ["storage.k8s.io"];
-      resources = ["storageclasses"];
-      verbs = ["*"];
-    } {
-      apiGroups = [""];
-      resources = ["pods" "services" "endpoints" "persistentvolumeclaims" "events"];
-      verbs = ["*"];
-    } {
-      apiGroups = ["apps"];
-      resources = ["deployments"];
-      verbs = ["*"];
-    }];
-
-    kubernetes.clusterRoleBindings.etcd-operator = {
-      roleRef = {
-        apiGroup = "rbac.authorization.k8s.io";
-        kind = "ClusterRole";
-        name = "etcd-operator";
-      };
-      subjects = [{
-        kind = "ServiceAccount";
-        name = "etcd-operator";
-        namespace = cfg.namespace;
+      kubernetes.clusterRoles.etcd-operator.rules = [{
+        apiGroups = ["etcd.database.coreos.com"];
+        resources = ["etcdclusters"];
+        verbs = ["*"];
+      } {
+        apiGroups = ["apiextensions.k8s.io"];
+        resources = ["customresourcedefinitions"];
+        verbs = ["*"];
+      } {
+        apiGroups = ["storage.k8s.io"];
+        resources = ["storageclasses"];
+        verbs = ["*"];
+      } {
+        apiGroups = [""];
+        resources = ["pods" "services" "endpoints" "persistentvolumeclaims" "events"];
+        verbs = ["*"];
+      } {
+        apiGroups = ["apps"];
+        resources = ["deployments"];
+        verbs = ["*"];
       }];
-    };
 
-    kubernetes.serviceAccounts.etcd-operator = {};
+      kubernetes.clusterRoleBindings.etcd-operator = {
+        roleRef = {
+          apiGroup = "rbac.authorization.k8s.io";
+          kind = "ClusterRole";
+          name = "etcd-operator";
+        };
+        subjects = [{
+          kind = "ServiceAccount";
+          name = "etcd-operator";
+          namespace = cfg.namespace;
+        }];
+      };
 
-    kubernetes.customResourceDefinitions.etcdclusters = {
-      group = "etcd.database.coreos.com";
-      version = "v1beta2";
-      names = {
-        plural = "etcdclusters";
+      kubernetes.serviceAccounts.etcd-operator = {};
+
+      kubernetes.customResourceDefinitions.etcdclusters = {
+        group = "etcd.database.coreos.com";
+        version = "v1beta2";
+        names = {
+          plural = "etcdclusters";
+          kind = "EtcdCluster";
+          shortNames = ["etcd"];
+        };
+      };
+    })
+    {
+      kubernetes.customResources.etcd-cluster = mapAttrs (name: config: {
         kind = "EtcdCluster";
-        shortNames = ["etcd"];
-      };
-    };
-
-    kubernetes.customResources.etcd-cluster = mapAttrs (name: config: {
-      kind = "EtcdCluster";
-      apiVersion = "etcd.database.coreos.com/v1beta2";
-      extra.spec = {
-        inherit (config) size version;
-        backup = {
-          inherit (config.backup) backupIntervalInSecond maxBackups storageType;
-        } // (optionalAttrs (config.backup.storageType == "PersistentVolume") {
-          pv = {
-            inherit (config.backup.pv) volumeSizeInMB;
-          };
-        });
-      };
-    }) cfg.clusters;
-  };
+        apiVersion = "etcd.database.coreos.com/v1beta2";
+        extra.spec = {
+          inherit (config) size version;
+          backup = {
+            inherit (config.backup) backupIntervalInSecond maxBackups storageType;
+          } // (optionalAttrs (config.backup.storageType == "PersistentVolume") {
+            pv = {
+              inherit (config.backup.pv) volumeSizeInMB;
+            };
+          });
+        };
+      }) cfg.clusters;
+    }
+  ];
 }

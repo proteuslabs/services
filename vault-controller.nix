@@ -61,6 +61,18 @@ in {
           description = "Vault secret path";
           type = types.str;
         };
+
+        renew = mkOption {
+          description = "Renew time in seconds";
+          type = types.nullOr types.int;
+          default = null;
+        };
+
+        data = mkOption {
+          type = types.nullOr types.attrs;
+          description = "Data to pass to get secrets";
+          default = null;
+        };
       };
     }));
   };
@@ -138,7 +150,11 @@ in {
       apiVersion = "vaultproject.io/v1";
       extra.spec = {
         inherit (config) type path;
-      };
+      } // (optionalAttrs (config.renew != null) {
+        inherit (config) renew;
+      }) // (optionalAttrs (config.data != null) {
+        inherit (config) data;
+      });
     }) config.kubernetes.secretClaims;
   };
 }
